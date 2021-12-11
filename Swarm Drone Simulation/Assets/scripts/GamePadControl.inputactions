@@ -1,0 +1,83 @@
+{
+    "name": "GamePadControl",
+    "maps": [
+        {
+            "name": "ActionMap",
+            "id": "bf3f11e8-27ef-44d4-9d0a-8b04771b816e",
+            "actions": [
+                {
+                    "name": "ThrYaw",
+                    "type": "Value",
+                    "id": "955f5a20-7f7c-4395-a02d-7b58f06155e4",
+                    "expectedControlType": "Stick",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "PitchRoll",
+                    "type": "Value",
+                    "id": "de41202f-22b3-44ac-9c21-2ec2b3d01ed5",
+                    "expectedControlType": "Stick",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "FS_Mode",
+                    "type": "Button",
+                    "id": "ecc994cd-2f5d-46d4-8bbb-196c87db34bc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e646aaff-ee3c-4ac1-a964-37cc05af4e8b",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "GamePad",
+                    "action": "ThrYaw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "602df8c8-b117-4389-ae02-effc1ce2af8a",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "GamePad",
+                    "action": "PitchRoll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "173c79f5-c69c-4665-acf0-c7889a422835",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "GamePad",
+                    "action": "FS_Mode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "GamePad",
+            "bindingGroup": "GamePad",
+            "devices": [
+                {
+                    "devicePath": "<Gamepad>",
+                    "isOptional": true,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
