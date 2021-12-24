@@ -14,18 +14,21 @@ public class ControlScript : MonoBehaviour
     public float pitchGyro;
     [HideInInspector]
     public float rollGyro;
-    private float yawGyro;
+    [HideInInspector]
+    public float headingGyro;
     private float pitchAcc;
     private float rollAcc;
-    private float accTotalVector;
-    private int xAccRaw, yAccRaw, zAccRaw;
+    [HideInInspector]
+    public float accTotalVector;
+    [HideInInspector]
+    public int xAccRaw, yAccRaw, zAccRaw;
     private float linearizedYawSensorValue;
     private int laps;
     private float lastYaw;
 
     private float lastPitchSensorValue;
     private float lastRollSensorValue;
-    private float lastYawSensorValue;
+    private float lastYawChangeRate;
     private float lastLinearizedSensorValue;
 
     public float maxPitchAngle = 5f;
@@ -93,16 +96,30 @@ public class ControlScript : MonoBehaviour
     private float maxI = 100;
     private float maxD = 300;
     private float minThrottle = 100f;
-    private float minUsrerThrottle = 500;
+    private float minUserThrottle = 500;
     private float sampleTime = 0.00125f;
 
+    [HideInInspector]
     public float barometerAltitude;
+    private float prevBarometerAltitude;
 
     bool armed = false;
     bool gamePad = false;
     bool fastMode = false;
     Vector2 pitchRollInput;
     Vector2 thrYawInput;
+
+    public bool altitudeHold = false;
+    public float altHoldSetPoint;
+    public float altHoldP;
+    public float altHoldI;
+    public float altHoldD;
+    private float altHold_P_out;
+    private float altHold_I_out;
+    private float altHold_D_out;
+    private float altHoldPID_out;
+    private float altHoldError;
+    private float altHoldPrevError;
 
     private void Awake()
     {
@@ -116,14 +133,15 @@ public class ControlScript : MonoBehaviour
         control.ActionMap.ThrYaw.performed += ctx => thrYawInput = ctx.ReadValue<Vector2>();
         control.ActionMap.ThrYaw.canceled += ctx => thrYawInput = Vector2.zero;
         control.ActionMap.FS_Mode.performed += ctx => FS_Mode();
+        control.ActionMap.ControlType.performed += ctx => ControlMode();
     }
     private void FS_Mode()
     {
         fastMode = !fastMode;
     }
-    void Start()
+    private void ControlMode()
     {
-
+        gamePad = !gamePad;
     }
 
     void FixedUpdate()
@@ -141,7 +159,23 @@ public class ControlScript : MonoBehaviour
 
         if (gamePad)
         {
-            if (armed) userThrottle = (Mathf.Abs(thrYawInput.y + 1) * 1200) + minUsrerThrottle;
+            if (armed)
+            {
+                if (thrYawInput.y != 0)
+                {
+                    userThrottle = (Mathf.Abs(thrYawInput.y + 1) * 1200) + minUserThrottle;
+                    altitudeHold = false;
+                    altHold_I_out = 500f;
+                    altHoldSetPoint = barometerAltitude;
+                }
+                else
+                {
+                    
+                    altitudeHold = true;
+                } 
+
+                
+            } 
             if (thrYawInput.y < -0.8) armed = true;
 
             if (fastMode)
@@ -151,8 +185,15 @@ public class ControlScript : MonoBehaviour
             }
             else
             {
-                pitchSetpoint = pitchRollInput.y * -maxPitchAngle;
-                rollSetpoint = pitchRollInput.x * maxRollAngle;
+
+                if (pitchSetpoint < pitchRollInput.y * -maxPitchAngle) pitchSetpoint += maxPitchAngle / 200f;
+                else if (pitchSetpoint > pitchRollInput.y * -maxPitchAngle) pitchSetpoint -= maxPitchAngle / 200f;
+
+                if (rollSetpoint < pitchRollInput.x * maxRollAngle) rollSetpoint += maxRollAngle / 200f;
+                else if (rollSetpoint > pitchRollInput.x * maxRollAngle) rollSetpoint -= maxRollAngle / 200f;
+
+                //pitchSetpoint = pitchRollInput.y * -maxPitchAngle;
+                //rollSetpoint = pitchRollInput.x * maxRollAngle;
             } 
 
             yawSetpoint = thrYawInput.x * -yawRate;
@@ -160,7 +201,7 @@ public class ControlScript : MonoBehaviour
         else
         {
             if (Input.GetKey(KeyCode.C) && userThrottle < 3000) userThrottle += 0.3f;
-            if (Input.GetKey(KeyCode.X) && userThrottle > minUsrerThrottle) userThrottle -= 0.3f;
+            if (Input.GetKey(KeyCode.X) && userThrottle > minUserThrottle) userThrottle -= 0.3f;
 
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -176,8 +217,9 @@ public class ControlScript : MonoBehaviour
 
             yawSetpoint = Input.GetAxis("Yaw") * -yawRate;
         }
-        if (Input.GetKeyDown(KeyCode.G)) gamePad = !gamePad;
+        
 
+        
     }
 
     void PID()
@@ -220,14 +262,20 @@ public class ControlScript : MonoBehaviour
         if (roll_D_out > maxD) roll_D_out = maxD;
         else if (roll_D_out < -maxD) roll_D_out = -maxD;
 
+        yaw_D_out = -(2.0f * yawD * (yawChangeRate - lastYawChangeRate)
+                        + (2.0f * tau - sampleTime) * yaw_D_out)
+                        / (2.0f * tau + sampleTime);
+
+        if (yaw_D_out > maxD) yaw_D_out = maxD;
+        else if (yaw_D_out < -maxD) yaw_D_out = -maxD;
+
         lastPitchSensorValue = pitchGyro;
         lastRollSensorValue = rollGyro;
-        lastYawSensorValue = linearizedYawSensorValue;
+        lastYawChangeRate = yawChangeRate;
 
         pitchPrevError = pitchError;
         rollPrevError = rollError;
         yawPrevError = yawError;
-
 
 
         // Calculating the overall and limiting PID values
@@ -242,6 +290,47 @@ public class ControlScript : MonoBehaviour
         if (yaw_P_out + yaw_I_out + yaw_D_out > maxPID) yaw_PID_out = maxPID;
         else if (yaw_P_out + yaw_I_out + yaw_D_out < -maxPID) yaw_PID_out = -maxPID;
         else yaw_PID_out = yaw_P_out + yaw_I_out + yaw_D_out;
+
+
+
+        if (altitudeHold)
+        {
+            // Altitude hold PID Controller
+            altHoldError = altHoldSetPoint - barometerAltitude;
+
+            // Altitude hold P Calculation
+            altHold_P_out = altHoldError * altHoldP;
+
+            // Altitude hold I Calculation
+            if (altHold_I_out + 0.5f * altHoldI * sampleTime * (altHoldError + altHoldPrevError) > 3000f) altHold_I_out = 3000f;
+            else if (altHold_I_out + 0.5f * altHoldI * sampleTime * (altHoldError + altHoldPrevError) < 500f) altHold_I_out = 500f;
+            else altHold_I_out = altHold_I_out + 0.5f * altHoldI * sampleTime * (altHoldError + altHoldPrevError);
+
+            // Altitude hold D Calculation
+            altHold_D_out = -(2.0f * altHoldD * (barometerAltitude - prevBarometerAltitude)
+                        + (2.0f * tau - sampleTime) * altHold_D_out)
+                        / (2.0f * tau + sampleTime);
+
+            if (altHold_D_out > 1500f) altHold_D_out = 1500f;
+            else if (altHold_D_out < -1500) altHold_D_out = -1500f;
+
+            // Limiting Altitude Hold PID values
+            if (altHold_P_out + altHold_I_out + altHold_D_out > 3000f) altHoldPID_out = 3000f;
+            else if (altHold_P_out + altHold_I_out + altHold_D_out < 0) altHoldPID_out = 0;
+            else altHoldPID_out = altHold_P_out + altHold_I_out + altHold_D_out;
+
+            userThrottle = altHoldPID_out + minUserThrottle;
+
+            altHoldPrevError = altHoldError;
+            prevBarometerAltitude = barometerAltitude;
+
+            //Debug.Log(altHold_P_out + " , " + altHold_I_out + " , " + altHold_D_out +" , " + userThrottle);
+
+        }
+
+        
+
+
 
         // Calculating and limiting all motor signals
         if (userThrottle - pitch_PID_out + roll_PID_out + yaw_PID_out > maxThrottle) LBThrottle = maxThrottle;
@@ -268,7 +357,13 @@ public class ControlScript : MonoBehaviour
         pitchGyro += GetComponent<LSM6DSL_Gyro>().xAxisOutput * 0.000021875f;
         rollGyro += GetComponent<LSM6DSL_Gyro>().zAxisOutput * 0.000021875f;
         yawChangeRate = GetComponent<LSM6DSL_Gyro>().yAxisOutput * -0.0175f;
-        
+        headingGyro += GetComponent<LSM6DSL_Gyro>().yAxisOutput * 0.000021875f;
+
+        if (headingGyro > 360) headingGyro = 0;
+        else if (headingGyro < 0) headingGyro = 360;
+
+        //Debug.Log(headingGyro);
+
         /*
         GetComponent<LSM6DSL_Gyro>().DPS250();
         pitchGyro += GetComponent<LSM6DSL_Gyro>().xAxisOutput * 0.0000109375f;
@@ -284,18 +379,22 @@ public class ControlScript : MonoBehaviour
         barometerAltitude = GetComponent<BMP280>().GetAltitude();
 
         accTotalVector = Mathf.Sqrt(Mathf.Pow(xAccRaw, 2) + Mathf.Pow(yAccRaw, 2) + Mathf.Pow(zAccRaw, 2));
-        pitchAcc = Mathf.Asin(zAccRaw / accTotalVector) * -Mathf.Rad2Deg;
+        pitchAcc = Mathf.Asin(zAccRaw / accTotalVector) * Mathf.Rad2Deg;
         rollAcc = Mathf.Asin(xAccRaw / accTotalVector) * -Mathf.Rad2Deg;
 
-        pitchGyro = (pitchGyro * 0.995f) + (pitchAcc * 0.005f);
-        rollGyro = (rollGyro * 0.995f) + (rollAcc * 0.005f);
+        pitchGyro = (pitchGyro * 1f) + (pitchAcc * 0f);
+        rollGyro = (rollGyro * 1f) + (rollAcc * 0f);
 
         //Debug.Log(pitchAcc + " , " + rollAcc + "   ,   " + pitchGyro + " , " + rollGyro);
         //Debug.Log(finalPitch + " , " + finalRoll);
 
-        
+        //yAccRaw += 16393;
+        //Debug.Log(xAccRaw + " , " + yAccRaw + " , " + zAccRaw);
+
+
         //Debug.Log(yawChangeRate);
         // Altitude
-        
+        GetComponent<EnvironmentalMeasurementsAndEffects>().VisualizeAcceleration();
+        GetComponent<L80REM37>().getLocation();
     }
 }

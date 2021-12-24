@@ -41,6 +41,14 @@ public class @GamePadControl : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""ControlType"",
+                    ""type"": ""Button"",
+                    ""id"": ""b68c0af4-f50f-4d1d-97ad-c7ac450c009e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -76,6 +84,17 @@ public class @GamePadControl : IInputActionCollection, IDisposable
                     ""action"": ""FS_Mode"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""daf1e06b-722f-4bb4-904d-576b7cc841e5"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""GamePad"",
+                    ""action"": ""ControlType"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -99,6 +118,7 @@ public class @GamePadControl : IInputActionCollection, IDisposable
         m_ActionMap_ThrYaw = m_ActionMap.FindAction("ThrYaw", throwIfNotFound: true);
         m_ActionMap_PitchRoll = m_ActionMap.FindAction("PitchRoll", throwIfNotFound: true);
         m_ActionMap_FS_Mode = m_ActionMap.FindAction("FS_Mode", throwIfNotFound: true);
+        m_ActionMap_ControlType = m_ActionMap.FindAction("ControlType", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -151,6 +171,7 @@ public class @GamePadControl : IInputActionCollection, IDisposable
     private readonly InputAction m_ActionMap_ThrYaw;
     private readonly InputAction m_ActionMap_PitchRoll;
     private readonly InputAction m_ActionMap_FS_Mode;
+    private readonly InputAction m_ActionMap_ControlType;
     public struct ActionMapActions
     {
         private @GamePadControl m_Wrapper;
@@ -158,6 +179,7 @@ public class @GamePadControl : IInputActionCollection, IDisposable
         public InputAction @ThrYaw => m_Wrapper.m_ActionMap_ThrYaw;
         public InputAction @PitchRoll => m_Wrapper.m_ActionMap_PitchRoll;
         public InputAction @FS_Mode => m_Wrapper.m_ActionMap_FS_Mode;
+        public InputAction @ControlType => m_Wrapper.m_ActionMap_ControlType;
         public InputActionMap Get() { return m_Wrapper.m_ActionMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -176,6 +198,9 @@ public class @GamePadControl : IInputActionCollection, IDisposable
                 @FS_Mode.started -= m_Wrapper.m_ActionMapActionsCallbackInterface.OnFS_Mode;
                 @FS_Mode.performed -= m_Wrapper.m_ActionMapActionsCallbackInterface.OnFS_Mode;
                 @FS_Mode.canceled -= m_Wrapper.m_ActionMapActionsCallbackInterface.OnFS_Mode;
+                @ControlType.started -= m_Wrapper.m_ActionMapActionsCallbackInterface.OnControlType;
+                @ControlType.performed -= m_Wrapper.m_ActionMapActionsCallbackInterface.OnControlType;
+                @ControlType.canceled -= m_Wrapper.m_ActionMapActionsCallbackInterface.OnControlType;
             }
             m_Wrapper.m_ActionMapActionsCallbackInterface = instance;
             if (instance != null)
@@ -189,6 +214,9 @@ public class @GamePadControl : IInputActionCollection, IDisposable
                 @FS_Mode.started += instance.OnFS_Mode;
                 @FS_Mode.performed += instance.OnFS_Mode;
                 @FS_Mode.canceled += instance.OnFS_Mode;
+                @ControlType.started += instance.OnControlType;
+                @ControlType.performed += instance.OnControlType;
+                @ControlType.canceled += instance.OnControlType;
             }
         }
     }
@@ -207,5 +235,6 @@ public class @GamePadControl : IInputActionCollection, IDisposable
         void OnThrYaw(InputAction.CallbackContext context);
         void OnPitchRoll(InputAction.CallbackContext context);
         void OnFS_Mode(InputAction.CallbackContext context);
+        void OnControlType(InputAction.CallbackContext context);
     }
 }

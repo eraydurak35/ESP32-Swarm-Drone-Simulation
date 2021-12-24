@@ -57,6 +57,13 @@ public class EnvironmentalMeasurementsAndEffects : MonoBehaviour
     public LineRenderer rightBottomLine;
     public LineRenderer rightTopLine;
 
+    public LineRenderer XAccPozitive;
+    public LineRenderer XAccNegative;
+    public LineRenderer YAccPozitive;
+    public LineRenderer YAccNegative;
+    public LineRenderer ZAccPozitive;
+    public LineRenderer ZAccNegative;
+
     private void Start()
     {
         droneBody = GetComponent<Rigidbody>();
@@ -111,6 +118,7 @@ public class EnvironmentalMeasurementsAndEffects : MonoBehaviour
         groundEffectBoostRB = GetComponent<Motors>().RBThrust * ((groundEffecCoef / 1000) / Mathf.Pow(distanceRB, 2));
         groundEffectBoostRT = GetComponent<Motors>().RTThrust * ((groundEffecCoef / 1000) / Mathf.Pow(distanceRT, 2));
 
+
         // Add force according to motor thrust
         droneBody.AddForceAtPosition(transform.up * (GetComponent<Motors>().LBThrust + groundEffectBoostLB), BottomLeftMotor.transform.position);
         droneBody.AddForceAtPosition(transform.up * (GetComponent<Motors>().LTThrust + groundEffectBoostLT), TopLeftMotor.transform.position);
@@ -131,6 +139,52 @@ public class EnvironmentalMeasurementsAndEffects : MonoBehaviour
         leftTopLine.transform.localScale = new Vector3(1, 1.3f, GetComponent<Motors>().LTThrust);
         rightBottomLine.transform.localScale = new Vector3(1, 1.3f, GetComponent<Motors>().RBThrust);
         rightTopLine.transform.localScale = new Vector3(1, 1.3f, GetComponent<Motors>().RTThrust);
+    }
+
+    public void VisualizeAcceleration()
+    {
+        if (GetComponent<LSM6DSL_Accelerometer>().xAccOut > 0)
+        {
+            XAccPozitive.transform.localScale = new Vector3(1, 1, GetComponent<LSM6DSL_Accelerometer>().xAccOut
+                / 40000f);
+
+            XAccNegative.transform.localScale = new Vector3(1, 1, 0);
+        }
+        else if (GetComponent<LSM6DSL_Accelerometer>().xAccOut < 0)
+        {
+            XAccNegative.transform.localScale = new Vector3(1, 1, -GetComponent<LSM6DSL_Accelerometer>().xAccOut
+                / 40000f);
+
+            XAccPozitive.transform.localScale = new Vector3(1, 1, 0);
+        }
+        if (GetComponent<LSM6DSL_Accelerometer>().yAccOut > 0)
+        {
+            YAccPozitive.transform.localScale = new Vector3(1, 1, GetComponent<LSM6DSL_Accelerometer>().yAccOut
+                / 40000f);
+
+            YAccNegative.transform.localScale = new Vector3(1, 1, 0);
+        }
+        else if (GetComponent<LSM6DSL_Accelerometer>().yAccOut < 0)
+        {
+            YAccNegative.transform.localScale = new Vector3(1, 1, -GetComponent<LSM6DSL_Accelerometer>().yAccOut
+                / 40000f);
+
+            YAccPozitive.transform.localScale = new Vector3(1, 1, 0);
+        }
+        if (GetComponent<LSM6DSL_Accelerometer>().zAccOut > 0)
+        {
+            ZAccPozitive.transform.localScale = new Vector3(1, 1, GetComponent<LSM6DSL_Accelerometer>().zAccOut
+                / 40000f);
+
+            ZAccNegative.transform.localScale = new Vector3(1, 1, 0);
+        }
+        else if (GetComponent<LSM6DSL_Accelerometer>().zAccOut < 0)
+        {
+            ZAccNegative.transform.localScale = new Vector3(1, 1, -GetComponent<LSM6DSL_Accelerometer>().zAccOut
+                / 40000f);
+
+            ZAccPozitive.transform.localScale = new Vector3(1, 1, 0);
+        }
     }
 
     public void WindDisturbance()
