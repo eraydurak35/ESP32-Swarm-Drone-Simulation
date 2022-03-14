@@ -8,31 +8,23 @@ public class ControlScript : MonoBehaviour
 
     GamePadControl control;
 
-    private float realYawAngle;
-
     [HideInInspector]
     public float pitchGyro;
     [HideInInspector]
     public float rollGyro;
     [HideInInspector]
     public float headingGyro;
-    private float pitchAcc;
-    private float rollAcc;
     [HideInInspector]
     public float accTotalVector;
     [HideInInspector]
     public int xAccRaw, yAccRaw, zAccRaw;
-    private float linearizedYawSensorValue;
-    private int laps;
-    private float lastYaw;
 
     private float lastPitchSensorValue;
     private float lastRollSensorValue;
     private float lastYawChangeRate;
-    private float lastLinearizedSensorValue;
 
-    public float maxPitchAngle = 5f;
-    public float maxRollAngle = 5f;
+    public float maxPitchAngle = 25f;
+    public float maxRollAngle = 25f;
     public float yawRate = 100f;
 
     public float pitchP = 0f;
@@ -110,6 +102,7 @@ public class ControlScript : MonoBehaviour
     Vector2 thrYawInput;
 
     public bool altitudeHold = false;
+    public bool positionHold = false;
     public float altHoldSetPoint;
     public float altHoldP;
     public float altHoldI;
@@ -120,6 +113,28 @@ public class ControlScript : MonoBehaviour
     private float altHoldPID_out;
     private float altHoldError;
     private float altHoldPrevError;
+
+    private float prevYaw;
+    private float positionX;
+    private float positionZ;
+    private float prevPositionX;
+    private float prevPositionZ;
+    private float positionXError;
+    private float positionZError;
+    private float pitchPosHoldHorth;
+    private float rollPosHoldHorth;
+    private float PosHoldSetX;
+    private float PosHoldSetZ;
+
+    public float posHoldP = 0f;
+    public float posHoldD = 0f;
+
+    private float pitchPosHold_P_out;
+    private float rollPosHold_P_out;
+    private float pitchPosHold_D_out;
+    private float rollPosHold_D_out;
+    private float correctedPitchPosHoldAngle;
+    private float correctedRollPosHoldAngle;
 
     private void Awake()
     {
@@ -151,6 +166,7 @@ public class ControlScript : MonoBehaviour
         Inputs();
         PID();
         GetComponent<Motors>().MotorsState();
+        GetComponent<EnvironmentalMeasurementsAndEffects>().WindDisturbance();
     }
 
     void Inputs()
@@ -170,9 +186,16 @@ public class ControlScript : MonoBehaviour
                 }
                 else
                 {
-                    
                     altitudeHold = true;
                 } 
+                if (pitchRollInput.x !=0 || pitchRollInput.y != 0)
+                {
+                    positionHold = false;
+                }
+                else
+                {
+                    positionHold = true;
+                }
 
                 
             } 
@@ -295,6 +318,7 @@ public class ControlScript : MonoBehaviour
 
         if (altitudeHold)
         {
+            altHoldSetPoint = 7f;
             // Altitude hold PID Controller
             altHoldError = altHoldSetPoint - barometerAltitude;
 
@@ -320,6 +344,7 @@ public class ControlScript : MonoBehaviour
             else altHoldPID_out = altHold_P_out + altHold_I_out + altHold_D_out;
 
             userThrottle = altHoldPID_out + minUserThrottle;
+            userThrottle += userThrottle * (Mathf.Sin(Mathf.Deg2Rad * Mathf.Abs(pitchGyro)) + Mathf.Sin(Mathf.Deg2Rad * Mathf.Abs(rollGyro)));
 
             altHoldPrevError = altHoldError;
             prevBarometerAltitude = barometerAltitude;
@@ -328,9 +353,48 @@ public class ControlScript : MonoBehaviour
 
         }
 
-        
+        if (positionHold)
+        {
+            PosHoldSetZ = 248f;
+            PosHoldSetX = 248f;
 
+            positionXError = PosHoldSetX - positionX;
+            positionZError = PosHoldSetZ - positionZ;
 
+            rollPosHold_P_out = -positionXError * (posHoldP / 100);
+            pitchPosHold_P_out = positionZError * (posHoldP / 100);
+
+            pitchPosHold_D_out = -(2.0f * posHoldD * (positionZ - prevPositionZ)
+                        + (2.0f * tau - sampleTime) * pitchPosHold_D_out)
+                        / (2.0f * tau + sampleTime);
+
+            rollPosHold_D_out = -(2.0f * posHoldD * (positionX - prevPositionX)
+                        + (2.0f * tau - sampleTime) * rollPosHold_D_out)
+                        / (2.0f * tau + sampleTime);
+
+            //Debug.Log(rollPosHold_P_out + "    " + rollPosHold_D_out);
+
+            pitchPosHoldHorth = pitchPosHold_P_out + pitchPosHold_D_out;
+            rollPosHoldHorth = rollPosHold_P_out + rollPosHold_D_out;
+
+            if (pitchPosHoldHorth > maxPitchAngle) pitchPosHoldHorth = maxPitchAngle;
+            else if (pitchPosHoldHorth < -maxPitchAngle) pitchPosHoldHorth = -maxPitchAngle;
+
+            if (rollPosHoldHorth > maxRollAngle) rollPosHoldHorth = maxRollAngle;
+            else if (rollPosHoldHorth < -maxRollAngle) rollPosHoldHorth = -maxRollAngle;
+
+            correctedPitchPosHoldAngle = pitchPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * UnityEditor.TransformUtils.GetInspectorRotation(transform).y)
+                + rollPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * (UnityEditor.TransformUtils.GetInspectorRotation(transform).y + 90f));
+
+            correctedRollPosHoldAngle = rollPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * UnityEditor.TransformUtils.GetInspectorRotation(transform).y)
+                + pitchPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * (UnityEditor.TransformUtils.GetInspectorRotation(transform).y - 90f));
+
+            pitchSetpoint = correctedPitchPosHoldAngle;
+            rollSetpoint = correctedRollPosHoldAngle;
+
+            prevPositionX = positionX;
+            prevPositionZ = positionZ;
+        }
 
         // Calculating and limiting all motor signals
         if (userThrottle - pitch_PID_out + roll_PID_out + yaw_PID_out > maxThrottle) LBThrottle = maxThrottle;
@@ -352,7 +416,20 @@ public class ControlScript : MonoBehaviour
     
     public void SensorFusion()
     {
-        
+        pitchGyro = UnityEditor.TransformUtils.GetInspectorRotation(transform).x;
+        rollGyro = UnityEditor.TransformUtils.GetInspectorRotation(transform).z;
+        yawChangeRate = (prevYaw - UnityEditor.TransformUtils.GetInspectorRotation(transform).y) / sampleTime;
+        prevYaw = UnityEditor.TransformUtils.GetInspectorRotation(transform).y;
+        barometerAltitude = transform.position.y;
+        positionX = transform.position.x;
+        positionZ = transform.position.z;
+
+
+        //Debug.Log(yawChangeRate + "  " + yawSetpoint);
+
+
+        /*
+
         GetComponent<LSM6DSL_Gyro>().DPS500();
         pitchGyro += GetComponent<LSM6DSL_Gyro>().xAxisOutput * 0.000021875f;
         rollGyro += GetComponent<LSM6DSL_Gyro>().zAxisOutput * 0.000021875f;
@@ -370,7 +447,7 @@ public class ControlScript : MonoBehaviour
         rollGyro += GetComponent<LSM6DSL_Gyro>().zAxisOutput * 0.0000109375f;
         yawChangeRate = GetComponent<LSM6DSL_Gyro>().yAxisOutput * -0.00875f;
         */
-
+        /*
         GetComponent<LSM6DSL_Accelerometer>().G2(GetComponent<Motors>().avrMotorThrottle);
         xAccRaw = GetComponent<LSM6DSL_Accelerometer>().xAccOut;
         yAccRaw = GetComponent<LSM6DSL_Accelerometer>().yAccOut;
@@ -384,7 +461,7 @@ public class ControlScript : MonoBehaviour
 
         pitchGyro = (pitchGyro * 1f) + (pitchAcc * 0f);
         rollGyro = (rollGyro * 1f) + (rollAcc * 0f);
-
+        */
         //Debug.Log(pitchAcc + " , " + rollAcc + "   ,   " + pitchGyro + " , " + rollGyro);
         //Debug.Log(finalPitch + " , " + finalRoll);
 
@@ -394,7 +471,10 @@ public class ControlScript : MonoBehaviour
 
         //Debug.Log(yawChangeRate);
         // Altitude
+        /*
         GetComponent<EnvironmentalMeasurementsAndEffects>().VisualizeAcceleration();
         GetComponent<L80REM37>().getLocation();
+
+        */
     }
 }

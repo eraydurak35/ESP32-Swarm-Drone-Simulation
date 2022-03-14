@@ -64,6 +64,10 @@ public class EnvironmentalMeasurementsAndEffects : MonoBehaviour
     public LineRenderer ZAccPozitive;
     public LineRenderer ZAccNegative;
 
+    public float XwindVelocity= 0;
+    public float YwindVelocity = 0;
+    public float ZwindVelocity = 0;
+
     private void Start()
     {
         droneBody = GetComponent<Rigidbody>();
@@ -189,6 +193,6 @@ public class EnvironmentalMeasurementsAndEffects : MonoBehaviour
 
     public void WindDisturbance()
     {
-
+        droneBody.AddForce(XwindVelocity/1000, YwindVelocity/1000, ZwindVelocity/1000);
     }
 }

@@ -38,10 +38,10 @@ public class Motors : MonoBehaviour
 
     public void MotorsState()
     {
-        LBDesiredThrottle = GetComponent<ControlScript>().LBThrottle;
-        LTDesiredThrottle = GetComponent<ControlScript>().LTThrottle;
-        RBDesiredThrottle = GetComponent<ControlScript>().RBThrottle;
-        RTDesiredThrottle = GetComponent<ControlScript>().RTThrottle;
+        LBActualThrottle = GetComponent<ControlScript>().LBThrottle;
+        LTActualThrottle = GetComponent<ControlScript>().LTThrottle;
+        RBActualThrottle = GetComponent<ControlScript>().RBThrottle;
+        RTActualThrottle = GetComponent<ControlScript>().RTThrottle;
 
         //if (LBActualThrottle - LBDesiredThrottle <= motorStepValue || LBActualThrottle - LBDesiredThrottle >= -motorStepValue) LBActualThrottle = LBDesiredThrottle;
         if (LBDesiredThrottle > LBActualThrottle) LBActualThrottle += motorStepValue;
