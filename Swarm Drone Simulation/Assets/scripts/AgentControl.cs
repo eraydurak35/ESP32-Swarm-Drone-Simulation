@@ -8,6 +8,8 @@ public class AgentControl : MonoBehaviour
     SwarmManagerScript SwarmManager;
     [SerializeField] GameObject SwarmManagerObj;
 
+    public GameObject LandingZone;
+
     public int AgentID;
     private bool Active = true;
     
@@ -43,6 +45,9 @@ public class AgentControl : MonoBehaviour
     public float yawSetRate = 0f;
 
     private float yawChangeRate;
+    public float AltChangeRate;
+    private float PrevAltitude;
+    public float AltHoldSetRate;
 
     private float pitchError = 0f;
     private float rollError = 0f;
@@ -87,7 +92,7 @@ public class AgentControl : MonoBehaviour
     private float maxD = 300;
     private float minThrottle = 100f;
     private float minUserThrottle = 500;
-    private float sampleTime = 0.00125f;
+    private float sampleTime = 0.005f;
 
     [HideInInspector]
     public float barometerAltitude;
@@ -130,6 +135,10 @@ public class AgentControl : MonoBehaviour
     private float correctedRollPosHoldAngle;
 
     public float TargetHeading;
+    public float distanceToLZ;
+    public float LandingDelay;
+    private bool Landed = false;
+    
     // Start is called before the first frame update
 
     private void Awake()
@@ -145,11 +154,6 @@ public class AgentControl : MonoBehaviour
 
     }
 
-    void Landing()
-    {
-
-    }
-
     void GetDataFromSwarmManager()
     {
 
@@ -157,30 +161,275 @@ public class AgentControl : MonoBehaviour
 
         if (Active)
         {
-            TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
+            Landed = false;
+            LandingDelay = 5f;
 
+
+
+            ////
+            //TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
+           // if (AgentID == 8f)
+            //{
+              PosHoldSetX = 250f;
+              PosHoldSetZ = 260f;
+              AltHoldSet = 10;
+            //}
+
+            /*
+            if (AgentID == 9f)
+            {
+                PosHoldSetX = 255f;
+                PosHoldSetZ = 260f;
+                AltHoldSet = 10;
+            }
+            
+            */
+            
+
+
+            if (SwarmManager.FormArrowHead && !SwarmManager.Mission && !SwarmManager.FormTriangle && !SwarmManager.TakeOff)
+            {
+                ArrowHeadFormation();
+            }
+            if (SwarmManager.FormTriangle && !SwarmManager.Mission && !SwarmManager.TakeOff && !SwarmManager.FormArrowHead)
+            {
+                TriangleFormation();
+            }
+            if (SwarmManager.TakeOff && !SwarmManager.FormTriangle && !SwarmManager.FormTriangle && !SwarmManager.Mission)
+            {
+                AltHoldSet = 10f;
+                PosHoldSetX = LandingZone.transform.position.x;
+                PosHoldSetZ = LandingZone.transform.position.z;
+            }
+            if (SwarmManager.Mission && !SwarmManager.TakeOff)
+            {
+                if (AgentID == 0)
+                {
+                    TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
+                    PosHoldSetX = SwarmManager.checkpointX;
+                    PosHoldSetZ = SwarmManager.checkpointZ;
+                    AltHoldSet = SwarmManager.checkpointY;
+                }
+                if (SwarmManager.FormArrowHead)
+                {
+                    ArrowHeadFormation();
+                }
+                else if (SwarmManager.FormTriangle)
+                {
+                    TriangleFormation();
+                }
+            }
+            else if (!SwarmManager.Mission && !SwarmManager.TakeOff)
+            {
+                if (AgentID == 0)
+                {
+                    PosHoldSetX = transform.position.x;
+                    PosHoldSetZ = transform.position.z;
+                    AltHoldSet = transform.position.y;
+                }
+            }
+
+
+
+            //SetHeading();
+
+        }
+        else Landing();
+
+    }
+
+
+
+    void Landing()
+    {
+        PosHoldSetX = LandingZone.transform.position.x;
+        PosHoldSetZ = LandingZone.transform.position.z;
+        
+        distanceToLZ = Mathf.Sqrt(Mathf.Pow((PosHoldSetX - transform.position.x), 2) + Mathf.Pow((PosHoldSetZ - transform.position.z), 2));
+
+        if (distanceToLZ > 0.2f)
+        {
+            TargetHeading = (Mathf.Atan2((LandingZone.transform.position.x - transform.position.x), (transform.position.z - LandingZone.transform.position.z)) * Mathf.Rad2Deg) * -1f;
+            AltHoldSet = 5f;
+            //SetHeading();
+        }
+
+        else if (distanceToLZ < 0.2f)
+        {
+            LandingDelay -= Time.deltaTime;
+            TargetHeading = 0f;
+            //SetHeading();
+
+            if (LandingDelay > 4f && LandingDelay < 5f)
+            {
+                AltHoldSet = 4f;
+            }
+            else if (LandingDelay > 2f && LandingDelay < 4f)
+            {
+                AltHoldSet = 3f;
+            }
+            else if (LandingDelay < 0)
+            {
+                AltHoldSet = 0f;
+                Landed = true;
+            }
+        }
+
+    }
+
+
+
+    void ArrowHeadFormation()
+    {
+        float a_k = -SwarmManager.Agent_Heading[0], u_b = 2f, a_b = 30f , u_k = 2f;
+        float ang_diff = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
+
+        /*
+        if (AgentID == 0)
+        {
+            TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
             PosHoldSetX = SwarmManager.checkpointX;
             PosHoldSetZ = SwarmManager.checkpointZ;
             AltHoldSet = SwarmManager.checkpointY;
-
-            if (TargetHeading > 180f) TargetHeading -= 360f;
-
-            if (TargetHeading < -170f || TargetHeading > 170f)
-            {
-                if (TargetHeading < 0f) TargetHeading += 360f;
-
-                if (AgentHeading < 0f) AgentHeading += 360f;
-            }
-
-            yawSetRate = (AgentHeading - TargetHeading) / 2f;
-            if (yawSetRate > yawRate) yawSetRate = yawRate;
-            else if (yawSetRate < -yawRate) yawSetRate = -yawRate;
         }
-        
+
+        */
+        if (AgentID == 1)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 2)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) + (1f * Mathf.Sin(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (1f * Mathf.Cos(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 3)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) - (1f * Mathf.Sin(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (1f * Mathf.Cos(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 4)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) + (2f * Mathf.Sin(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (2f * Mathf.Cos(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 5)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) - (2f * Mathf.Sin(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (2f * Mathf.Cos(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+
+        ////////
+        else if (AgentID == 6)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) + (3f * Mathf.Sin(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (3f * Mathf.Cos(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 7)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) - (3f * Mathf.Sin(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (3f * Mathf.Cos(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 8)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) + (4f * Mathf.Sin(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (4f * Mathf.Cos(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 9)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k) - (4f * Mathf.Sin(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] + (Mathf.Cos(Mathf.Deg2Rad * -a_k) * u_k) - (4f * Mathf.Cos(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+
     }
+
+    void TriangleFormation()
+    {
+
+        float a_k = -SwarmManager.Agent_Heading[0], u_b = 2f, a_b = 30f, u_k = 2f;
+        float ang_diff = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
+        /*
+        if (AgentID == 0)
+        {
+            TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
+            PosHoldSetX = SwarmManager.checkpointX;
+            PosHoldSetZ = SwarmManager.checkpointZ;
+            AltHoldSet = SwarmManager.checkpointY;
+        }
+        */
+        if (AgentID == 1)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] - (1f * Mathf.Sin(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (1f * Mathf.Cos(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 2)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (1f * Mathf.Sin(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (1f * Mathf.Cos(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+    }
+    /*
+    void SetHeading()
+    {
+        if (TargetHeading > 180f) TargetHeading -= 360f;
+
+        if (TargetHeading < -170f || TargetHeading > 170f)
+        {
+            if (TargetHeading < 0f) TargetHeading += 360f;
+
+            if (AgentHeading < 0f) AgentHeading += 360f;
+        }
+
+        yawSetRate = (AgentHeading - TargetHeading) / 2f;
+        if (yawSetRate > yawRate) yawSetRate = yawRate;
+        else if (yawSetRate < -yawRate) yawSetRate = -yawRate;
+    }
+
+    */
 
     void PID()
     {
+
+        //////////////////////////////////  HEADING CALCULATIONS  ////////////////////////
+        ///
+        if (TargetHeading > 180f) TargetHeading -= 360f;
+
+        if (TargetHeading < -170f || TargetHeading > 170f)
+        {
+            if (TargetHeading < 0f) TargetHeading += 360f;
+
+            if (AgentHeading < 0f) AgentHeading += 360f;
+        }
+
+        yawSetRate = (AgentHeading - TargetHeading) / 2f;
+        if (yawSetRate > yawRate) yawSetRate = yawRate;
+        else if (yawSetRate < -yawRate) yawSetRate = -yawRate;
+
+
+
         // Error calculations
         pitchError = pitchSetpoint - pitchGyro;
         rollError = rollSetpoint - rollGyro;
@@ -254,10 +503,9 @@ public class AgentControl : MonoBehaviour
 
         ////////////////////////////////////////////////////////////////////////////////////////////////  ALTITUDE HOLD  //////////////////////////////////////
 
-        altHoldError = AltHoldSet - barometerAltitude;
+        AltHoldSetRate = ((AltHoldSet + SwarmManager.CollisionAltChange[AgentID]) - transform.position.y) / 5f;
 
-        if (altHoldError > 3f) altHoldError = 3f;
-        else if (altHoldError < -3f) altHoldError = -3f;
+        altHoldError = AltHoldSetRate - AltChangeRate;
 
         // Altitude hold P Calculation
         altHold_P_out = altHoldError * altHoldP;
@@ -271,7 +519,7 @@ public class AgentControl : MonoBehaviour
 
 
         // Altitude hold D Calculation
-        altHold_D_out = -(2.0f * altHoldD * (barometerAltitude - prevBarometerAltitude)
+        altHold_D_out = -(2.0f * altHoldD * (AltChangeRate)
                     + (2.0f * tau - sampleTime) * altHold_D_out)
                     / (2.0f * tau + sampleTime);
 
@@ -287,7 +535,6 @@ public class AgentControl : MonoBehaviour
         userThrottle += userThrottle * (Mathf.Sin(Mathf.Deg2Rad * Mathf.Abs(pitchGyro)) + Mathf.Sin(Mathf.Deg2Rad * Mathf.Abs(rollGyro)));
 
         altHoldPrevError = altHoldError;
-        prevBarometerAltitude = barometerAltitude;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////  POSITION HOLD ////////////////////////////////////////////////
 
@@ -309,6 +556,7 @@ public class AgentControl : MonoBehaviour
 
         pitchPosHoldHorth = pitchPosHold_P_out + pitchPosHold_D_out;
         rollPosHoldHorth = rollPosHold_P_out - rollPosHold_D_out;
+        /*
 
         if (pitchPosHoldHorth > maxPitchAngle) pitchPosHoldHorth = maxPitchAngle;
         else if (pitchPosHoldHorth < -maxPitchAngle) pitchPosHoldHorth = -maxPitchAngle;
@@ -316,14 +564,21 @@ public class AgentControl : MonoBehaviour
         if (rollPosHoldHorth > maxRollAngle) rollPosHoldHorth = maxRollAngle;
         else if (rollPosHoldHorth < -maxRollAngle) rollPosHoldHorth = -maxRollAngle;
 
+        */
         correctedPitchPosHoldAngle = pitchPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * UnityEditor.TransformUtils.GetInspectorRotation(transform).y)
             + rollPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * (UnityEditor.TransformUtils.GetInspectorRotation(transform).y + 90f));
 
         correctedRollPosHoldAngle = rollPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * UnityEditor.TransformUtils.GetInspectorRotation(transform).y)
             + pitchPosHoldHorth * Mathf.Cos(Mathf.Deg2Rad * (UnityEditor.TransformUtils.GetInspectorRotation(transform).y - 90f));
 
-        pitchSetpoint = correctedPitchPosHoldAngle;
-        rollSetpoint = correctedRollPosHoldAngle;
+        pitchSetpoint = correctedPitchPosHoldAngle + SwarmManager.CollisionPitchChange[AgentID];
+        rollSetpoint = correctedRollPosHoldAngle + SwarmManager.CollisionRollChange[AgentID];
+
+        if (pitchSetpoint > maxPitchAngle) pitchSetpoint = maxPitchAngle;
+        else if (pitchSetpoint < -maxPitchAngle) pitchSetpoint = -maxPitchAngle;
+
+        if (rollSetpoint > maxRollAngle) rollSetpoint = maxRollAngle;
+        else if (rollSetpoint < -maxRollAngle) rollSetpoint = -maxRollAngle;
 
         prevPositionX = positionX;
         prevPositionZ = positionZ;
@@ -374,7 +629,8 @@ public class AgentControl : MonoBehaviour
         
         yawChangeRate = (prevYaw - UnityEditor.TransformUtils.GetInspectorRotation(transform).y) / sampleTime;
         prevYaw = UnityEditor.TransformUtils.GetInspectorRotation(transform).y;
-        barometerAltitude = transform.position.y;
+        AltChangeRate = (transform.position.y - PrevAltitude) / sampleTime;
+        PrevAltitude = transform.position.y;
         positionX = transform.position.x;
         positionZ = transform.position.z;
     }

@@ -30,7 +30,7 @@ public class AgentMotors : MonoBehaviour
     private float RTVoltage;
 
     private float motorStepValue;
-    public float updateRate = 800;
+    public float updateRate = 200;
     // Start is called before the first frame update
     private void Start()
     {

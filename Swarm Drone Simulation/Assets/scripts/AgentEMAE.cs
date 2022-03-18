@@ -33,7 +33,7 @@ public class AgentEMAE : MonoBehaviour
     private Vector3 prevPosition;
     [HideInInspector]
     public float speed;
-    public float updateRate = 800;
+    public float updateRate = 200;
 
     public float groundEffecCoef = 12f;
     private float groundEffectBoostLB;
@@ -123,15 +123,17 @@ public class AgentEMAE : MonoBehaviour
         droneBody.AddTorque(transform.up * ((GetComponent<AgentMotors>().LBThrust + GetComponent<AgentMotors>().RTThrust) - (GetComponent<AgentMotors>().LTThrust + GetComponent<AgentMotors>().RBThrust)) / 50);
 
         // Turn propellers acording to motor thrust
-        left_bott_prop.Rotate(0, GetComponent<AgentMotors>().LBThrust * -50, 0);
-        left_top_prop.Rotate(0, GetComponent<AgentMotors>().LTThrust * 50, 0);
-        right_bott_prop.Rotate(0, GetComponent<AgentMotors>().RBThrust * 50, 0);
-        right_top_prop.Rotate(0, GetComponent<AgentMotors>().RTThrust * -50, 0);
+        left_bott_prop.Rotate(0, GetComponent<AgentMotors>().LBThrust * -200, 0);
+        left_top_prop.Rotate(0, GetComponent<AgentMotors>().LTThrust * 200, 0);
+        right_bott_prop.Rotate(0, GetComponent<AgentMotors>().RBThrust * 200, 0);
+        right_top_prop.Rotate(0, GetComponent<AgentMotors>().RTThrust * -200, 0);
 
         // Visulalize motor thrust 
+        /*
         leftBottomLine.transform.localScale = new Vector3(1, 1.3f, GetComponent<AgentMotors>().LBThrust);
         leftTopLine.transform.localScale = new Vector3(1, 1.3f, GetComponent<AgentMotors>().LTThrust);
         rightBottomLine.transform.localScale = new Vector3(1, 1.3f, GetComponent<AgentMotors>().RBThrust);
         rightTopLine.transform.localScale = new Vector3(1, 1.3f, GetComponent<AgentMotors>().RTThrust);
+        */
     }
 }
