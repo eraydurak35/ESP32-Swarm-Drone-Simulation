@@ -170,9 +170,9 @@ public class AgentControl : MonoBehaviour
             //TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
            // if (AgentID == 8f)
             //{
-              PosHoldSetX = 250f;
-              PosHoldSetZ = 260f;
-              AltHoldSet = 10;
+              //PosHoldSetX = 250f;
+              //PosHoldSetZ = 260f;
+              //AltHoldSet = 10;
             //}
 
             /*
@@ -228,11 +228,6 @@ public class AgentControl : MonoBehaviour
                     AltHoldSet = transform.position.y;
                 }
             }
-
-
-
-            //SetHeading();
-
         }
         else Landing();
 
@@ -251,14 +246,12 @@ public class AgentControl : MonoBehaviour
         {
             TargetHeading = (Mathf.Atan2((LandingZone.transform.position.x - transform.position.x), (transform.position.z - LandingZone.transform.position.z)) * Mathf.Rad2Deg) * -1f;
             AltHoldSet = 5f;
-            //SetHeading();
         }
 
         else if (distanceToLZ < 0.2f)
         {
             LandingDelay -= Time.deltaTime;
             TargetHeading = 0f;
-            //SetHeading();
 
             if (LandingDelay > 4f && LandingDelay < 5f)
             {
@@ -284,16 +277,6 @@ public class AgentControl : MonoBehaviour
         float a_k = -SwarmManager.Agent_Heading[0], u_b = 2f, a_b = 30f , u_k = 2f;
         float ang_diff = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
 
-        /*
-        if (AgentID == 0)
-        {
-            TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
-            PosHoldSetX = SwarmManager.checkpointX;
-            PosHoldSetZ = SwarmManager.checkpointZ;
-            AltHoldSet = SwarmManager.checkpointY;
-        }
-
-        */
         if (AgentID == 1)
         {
             PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * -a_k) * u_k);
@@ -367,15 +350,7 @@ public class AgentControl : MonoBehaviour
 
         float a_k = -SwarmManager.Agent_Heading[0], u_b = 2f, a_b = 30f, u_k = 2f;
         float ang_diff = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
-        /*
-        if (AgentID == 0)
-        {
-            TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
-            PosHoldSetX = SwarmManager.checkpointX;
-            PosHoldSetZ = SwarmManager.checkpointZ;
-            AltHoldSet = SwarmManager.checkpointY;
-        }
-        */
+ 
         if (AgentID == 1)
         {
             PosHoldSetX = SwarmManager.Agent_X[0] - (1f * Mathf.Sin(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
@@ -391,24 +366,6 @@ public class AgentControl : MonoBehaviour
             TargetHeading = SwarmManager.Agent_Heading[0];
         }
     }
-    /*
-    void SetHeading()
-    {
-        if (TargetHeading > 180f) TargetHeading -= 360f;
-
-        if (TargetHeading < -170f || TargetHeading > 170f)
-        {
-            if (TargetHeading < 0f) TargetHeading += 360f;
-
-            if (AgentHeading < 0f) AgentHeading += 360f;
-        }
-
-        yawSetRate = (AgentHeading - TargetHeading) / 2f;
-        if (yawSetRate > yawRate) yawSetRate = yawRate;
-        else if (yawSetRate < -yawRate) yawSetRate = -yawRate;
-    }
-
-    */
 
     void PID()
     {
