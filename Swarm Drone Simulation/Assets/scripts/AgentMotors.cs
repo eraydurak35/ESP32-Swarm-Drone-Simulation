@@ -61,7 +61,7 @@ public class AgentMotors : MonoBehaviour
         else if (RTDesiredThrottle < RTActualThrottle) RTActualThrottle -= motorStepValue;
 
         */
-        avrMotorThrottle = (LBActualThrottle + LTActualThrottle + RTActualThrottle + RBActualThrottle) / 4;
+        avrMotorThrottle = (LBActualThrottle + LTActualThrottle + RTActualThrottle + RBActualThrottle) / 4f;
 
         // Calculate motor volatages from motor signals
         LBVoltage = LBActualThrottle * (GetComponent<AgentBattery>().voltage / 4095f);

@@ -57,6 +57,7 @@ public class SwarmManagerScript : MonoBehaviour
     public float NoAvoidUntil = 1f;
     [HideInInspector]
     public float[] AgentCollHeading = new float[10];
+    public float angsq = 60f;
     private void Awake()
     {
 
@@ -91,16 +92,16 @@ public class SwarmManagerScript : MonoBehaviour
             }
 
         }
-
+        /*
         if (Agent_Y[0] >= 9f && TakeOff)
         {
             TakeOff = false;
             FormArrowHead = true;
-            Mission = true;
+            //Mission = true;
         }
 
 
-
+        */
         
         
 
@@ -144,69 +145,8 @@ public class SwarmManagerScript : MonoBehaviour
                 if (Agent_Heading[n] < 0f) AgentCollHeading[n] = Agent_Heading[n] + 360f;
                 CollisionHeading[n, k] = (CollisionHeading[n, k] - Agent_Heading[n]) % 360f;
 
-                if (CollisionDistance[n, k] > NoAvoidUntil) CollisionDistance[n, k] = 200f;
-
-                /*
-                if (Agent_Heading[8] < 0f) x = Agent_Heading[8] + 360f;
-                else x = Agent_Heading[8];
-                */
-
-                //CollisionHeading[8, 9] = CollisionHeading[8, 9] - Agent_Heading[8];
-
-                /*
-                if (Agent_Heading[n] < 0f) CollisionHeading[n, k] -= Agent_Heading[n] + 360f;
-                else CollisionHeading[n, k] -= Agent_Heading[n];
-
-                */
-
-                ////////////////////////////   AVOID BY ALTITUDE   /////////////////////////////
-
-                /*
-                if (CollisionDistance[n,k] < 2f)
-                {
-                    if (Agent_Y[n] > Agent_Y[k])
-                    {
-                        CollisionAltChange[n] = 2f / Mathf.Pow(CollisionDistance[n, k], 2);
-                        CollisionAltChange[k] = -2f / Mathf.Pow(CollisionDistance[n, k], 2);
-                        //Debug.Log("1......  " +n + "  " + k + "  " + CollisionAltChange[n] + "   " + CollisionAltChange[k]);
-                        //Debug.Log(CollisionDistanceChangeRate[n, k]);
-                    }
-                    else if (Agent_Y[n] <= Agent_Y[k])
-                    {
-                        CollisionAltChange[n] = -2f / Mathf.Pow(CollisionDistance[n, k], 2);
-                        CollisionAltChange[k] = 2f / Mathf.Pow(CollisionDistance[n, k], 2);
-                        //Debug.Log("1......  " + n + "  " + k + "  " + CollisionAltChange[n] + "   " + CollisionAltChange[k]);
-                        //Debug.Log(CollisionDistanceChangeRate[n, k]);
-                    }
-
-                }
-                else if (CollisionDistance[n, k] > 10f)
-                {
-                    CollisionAltChange[n] = 0f;
-                    CollisionAltChange[k] = 0f;
-                }
-                */
-
-                //////////////////////////////    AVOID BY POSITION    ////////////////////////////
-
-                /*
-                CollisionHeading = (Mathf.Atan2((Agent_X[k] - Agent_X[n]), (Agent_Z[n] - Agent_Z[k])) * Mathf.Rad2Deg) * -1f;
-                if (CollisionHeading < 0f) CollisionHeading += 360f;
-                if (Agent_Heading[n] < 0f) CollisionHeading -= Agent_Heading[n] + 360f;
-                else CollisionHeading -= Agent_Heading[n];
-
-                CollisionPitchChange[n] = Mathf.Cos(Mathf.Deg2Rad * CollisionHeading) * 10f;
-                CollisionRollChange[n] = Mathf.Sin(Mathf.Deg2Rad * CollisionHeading) * -10f;
-                CollisionPitchChange[k] = Mathf.Cos(Mathf.Deg2Rad * CollisionHeading) * -10f;
-                CollisionRollChange[k] = Mathf.Sin(Mathf.Deg2Rad * CollisionHeading) * 10f;
-
-                */
-                //Debug.Log(n + "  " + k + "  " + CollisionHeading);
-                //Debug.Log(CollisionPitchChange[n] + "  " + CollisionRollChange[n] + "  " + CollisionPitchChange[k] + "  " + CollisionRollChange[k]);
-                //Time.timeScale = 0;
+                if (CollisionDistance[n, k] > NoAvoidUntil) CollisionDistance[n, k] = 200f; 
             }
-
-
         }
         
 
@@ -450,4 +390,62 @@ public class SwarmManagerScript : MonoBehaviour
             - CollisionAvoidCoeff * (Mathf.Sin(Mathf.Deg2Rad * (CollisionHeading[8, 9] - (AgentCollHeading[8] - AgentCollHeading[9]))) / Mathf.Pow(CollisionDistance[8, 9], 2));
 
     }
+    /*
+                if (Agent_Heading[8] < 0f) x = Agent_Heading[8] + 360f;
+                else x = Agent_Heading[8];
+                */
+
+    //CollisionHeading[8, 9] = CollisionHeading[8, 9] - Agent_Heading[8];
+
+    /*
+    if (Agent_Heading[n] < 0f) CollisionHeading[n, k] -= Agent_Heading[n] + 360f;
+    else CollisionHeading[n, k] -= Agent_Heading[n];
+
+    */
+
+    ////////////////////////////   AVOID BY ALTITUDE   /////////////////////////////
+
+    /*
+    if (CollisionDistance[n,k] < 2f)
+    {
+        if (Agent_Y[n] > Agent_Y[k])
+        {
+            CollisionAltChange[n] = 2f / Mathf.Pow(CollisionDistance[n, k], 2);
+            CollisionAltChange[k] = -2f / Mathf.Pow(CollisionDistance[n, k], 2);
+            //Debug.Log("1......  " +n + "  " + k + "  " + CollisionAltChange[n] + "   " + CollisionAltChange[k]);
+            //Debug.Log(CollisionDistanceChangeRate[n, k]);
+        }
+        else if (Agent_Y[n] <= Agent_Y[k])
+        {
+            CollisionAltChange[n] = -2f / Mathf.Pow(CollisionDistance[n, k], 2);
+            CollisionAltChange[k] = 2f / Mathf.Pow(CollisionDistance[n, k], 2);
+            //Debug.Log("1......  " + n + "  " + k + "  " + CollisionAltChange[n] + "   " + CollisionAltChange[k]);
+            //Debug.Log(CollisionDistanceChangeRate[n, k]);
+        }
+
+    }
+    else if (CollisionDistance[n, k] > 10f)
+    {
+        CollisionAltChange[n] = 0f;
+        CollisionAltChange[k] = 0f;
+    }
+    */
+
+    //////////////////////////////    AVOID BY POSITION    ////////////////////////////
+
+    /*
+    CollisionHeading = (Mathf.Atan2((Agent_X[k] - Agent_X[n]), (Agent_Z[n] - Agent_Z[k])) * Mathf.Rad2Deg) * -1f;
+    if (CollisionHeading < 0f) CollisionHeading += 360f;
+    if (Agent_Heading[n] < 0f) CollisionHeading -= Agent_Heading[n] + 360f;
+    else CollisionHeading -= Agent_Heading[n];
+
+    CollisionPitchChange[n] = Mathf.Cos(Mathf.Deg2Rad * CollisionHeading) * 10f;
+    CollisionRollChange[n] = Mathf.Sin(Mathf.Deg2Rad * CollisionHeading) * -10f;
+    CollisionPitchChange[k] = Mathf.Cos(Mathf.Deg2Rad * CollisionHeading) * -10f;
+    CollisionRollChange[k] = Mathf.Sin(Mathf.Deg2Rad * CollisionHeading) * 10f;
+
+    */
+    //Debug.Log(n + "  " + k + "  " + CollisionHeading);
+    //Debug.Log(CollisionPitchChange[n] + "  " + CollisionRollChange[n] + "  " + CollisionPitchChange[k] + "  " + CollisionRollChange[k]);
+    //Time.timeScale = 0;
 }

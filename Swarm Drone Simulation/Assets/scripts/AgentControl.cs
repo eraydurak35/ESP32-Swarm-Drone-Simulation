@@ -138,7 +138,7 @@ public class AgentControl : MonoBehaviour
     public float distanceToLZ;
     public float LandingDelay;
     private bool Landed = false;
-    
+
     // Start is called before the first frame update
 
     private void Awake()
@@ -151,13 +151,13 @@ public class AgentControl : MonoBehaviour
         GetDataFromSwarmManager();
         PID();
         GetComponent<AgentMotors>().MotorsState();
-
     }
 
     void GetDataFromSwarmManager()
     {
 
         Active = SwarmManager.ActiveAgents[AgentID];
+
 
         if (Active)
         {
@@ -168,11 +168,11 @@ public class AgentControl : MonoBehaviour
 
             ////
             //TargetHeading = SwarmManager.AgentTargetHeading[AgentID];
-           // if (AgentID == 8f)
+            // if (AgentID == 8f)
             //{
-              //PosHoldSetX = 250f;
-              //PosHoldSetZ = 260f;
-              //AltHoldSet = 10;
+            //PosHoldSetX = 250f;
+            //PosHoldSetZ = 260f;
+            //AltHoldSet = 10;
             //}
 
             /*
@@ -184,7 +184,11 @@ public class AgentControl : MonoBehaviour
             }
             
             */
-            
+
+            PosHoldSetX = 250f;
+            PosHoldSetZ = 260f;
+            AltHoldSet = 10;
+
 
 
             if (SwarmManager.FormArrowHead && !SwarmManager.Mission && !SwarmManager.FormTriangle && !SwarmManager.TakeOff)
@@ -193,7 +197,9 @@ public class AgentControl : MonoBehaviour
             }
             if (SwarmManager.FormTriangle && !SwarmManager.Mission && !SwarmManager.TakeOff && !SwarmManager.FormArrowHead)
             {
-                TriangleFormation();
+                //TriangleFormation();
+                //TrianglePrizmFormation();
+                SquarePrizmFormation();
             }
             if (SwarmManager.TakeOff && !SwarmManager.FormTriangle && !SwarmManager.FormTriangle && !SwarmManager.Mission)
             {
@@ -348,24 +354,130 @@ public class AgentControl : MonoBehaviour
     void TriangleFormation()
     {
 
-        float a_k = -SwarmManager.Agent_Heading[0], u_b = 2f, a_b = 30f, u_k = 2f;
-        float ang_diff = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
+        float x = 2f, a = 30f;
+        float beta = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
  
         if (AgentID == 1)
         {
-            PosHoldSetX = SwarmManager.Agent_X[0] - (1f * Mathf.Sin(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
-            PosHoldSetZ = SwarmManager.Agent_Z[0] - (1f * Mathf.Cos(Mathf.Deg2Rad * (-a_b - ang_diff)) * u_b);
+            PosHoldSetX = SwarmManager.Agent_X[0] - (Mathf.Sin(Mathf.Deg2Rad * (-a - beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a - beta)) * x);
             AltHoldSet = SwarmManager.Agent_Y[0];
             TargetHeading = SwarmManager.Agent_Heading[0];
         }
         else if (AgentID == 2)
         {
-            PosHoldSetX = SwarmManager.Agent_X[0] + (1f * Mathf.Sin(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
-            PosHoldSetZ = SwarmManager.Agent_Z[0] - (1f * Mathf.Cos(Mathf.Deg2Rad * (-a_b + ang_diff)) * u_b);
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * (-a + beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a + beta)) * x);
             AltHoldSet = SwarmManager.Agent_Y[0];
             TargetHeading = SwarmManager.Agent_Heading[0];
         }
     }
+    void TrianglePrizmFormation()
+    {
+        float x = 2f, a = 30f,h = 3f;
+        float beta = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
+
+        if (AgentID == 1)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] - (Mathf.Sin(Mathf.Deg2Rad * (-a - beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a - beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 2)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * (-a + beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a + beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0];
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 3)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0];
+            PosHoldSetZ = SwarmManager.Agent_Z[0];
+            AltHoldSet = SwarmManager.Agent_Y[0] + h;
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 4)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] - (Mathf.Sin(Mathf.Deg2Rad * (-a - beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a - beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] + h;
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 5)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * (-a + beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a + beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] + h;
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+    }
+
+    void SquarePrizmFormation()
+    {
+        float x = 2f, a = 45f;
+        float beta = Mathf.Abs(SwarmManager.Agent_Heading[0] - 180f);
+        float angleForSquare = 67.5f;
+
+        if (AgentID == 1)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] - (Mathf.Sin(Mathf.Deg2Rad * (-a - beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a - beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] - (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 2)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * (-a + beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a + beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] - (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 3)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] - (2f * Mathf.Sin(Mathf.Deg2Rad * ((-a - beta) + angleForSquare)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (2f * Mathf.Cos(Mathf.Deg2Rad * ((-a - beta) + angleForSquare)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] - (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 4)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (2f * Mathf.Sin(Mathf.Deg2Rad * ((-a + beta) + angleForSquare)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (2f * Mathf.Cos(Mathf.Deg2Rad * ((-a + beta) + angleForSquare)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] - (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 5)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] - (Mathf.Sin(Mathf.Deg2Rad * (-a - beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a - beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] + (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 6)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (Mathf.Sin(Mathf.Deg2Rad * (-a + beta)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (Mathf.Cos(Mathf.Deg2Rad * (-a + beta)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] + (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 7)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] - (2f * Mathf.Sin(Mathf.Deg2Rad * ((-a - beta) + angleForSquare)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (2f * Mathf.Cos(Mathf.Deg2Rad * ((-a - beta) + angleForSquare)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] + (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+        else if (AgentID == 8)
+        {
+            PosHoldSetX = SwarmManager.Agent_X[0] + (2f * Mathf.Sin(Mathf.Deg2Rad * ((-a + beta) + angleForSquare)) * x);
+            PosHoldSetZ = SwarmManager.Agent_Z[0] - (2f * Mathf.Cos(Mathf.Deg2Rad * ((-a + beta) + angleForSquare)) * x);
+            AltHoldSet = SwarmManager.Agent_Y[0] + (x / 2f);
+            TargetHeading = SwarmManager.Agent_Heading[0];
+        }
+    }
+
 
     void PID()
     {
