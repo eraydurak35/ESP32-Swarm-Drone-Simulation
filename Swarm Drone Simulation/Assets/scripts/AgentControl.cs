@@ -219,13 +219,182 @@ public class AgentControl : MonoBehaviour
             {
                 HexagonPrizmFormation();
             }
+            else if (SwarmManager.FormHexagon)
+            {
+                HexagonFormation();
+            }
+            if (SwarmManager.Form3DmissionTakeOff1)
+            {
+                Formation3DMissionTakeOff1();
+            }
+            if (SwarmManager.Form3DmissionTakeOff2)
+            {
+                Formation3DMissionTakeOff2();
+            }
+            if (SwarmManager.TaskSwitchTakeOff1)
+            {
+                TaskSwitchTakeOff1();
+            }
+            if (SwarmManager.TaskSwitchTakeOff2)
+            {
+                TaskSwitchTakeOff2();
+            }
 
-            
+
         }
         else Landing();
 
     }
 
+    void Formation3DMissionTakeOff1()
+    {
+        /////////  TakeOff1 Logic for Square Prizm Formation
+        for (int l = 0; l < 8; l++)
+        {
+            if (AgentID == l)
+            {
+                AltHoldSet = SwarmManager.takeOffHight;
+                PosHoldSetX = LandingZone.transform.position.x;
+                PosHoldSetZ = LandingZone.transform.position.z;
+            } 
+        }
+
+        if (!SwarmManager.Form3DmissionTakeOff1Success)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                if (Mathf.Abs(AltHoldSet - SwarmManager.Agent_Y[i]) < 0.3f)
+                {
+                    SwarmManager.AgentTakeOffSucces[i] = true;
+                }
+                for (int j = 0; j < 8; j++)
+                {
+                    if (SwarmManager.AgentTakeOffSucces[j])
+                    {
+                        SwarmManager.takeoffcounter++;
+                        if (SwarmManager.takeoffcounter == 8)
+                        {
+                            SwarmManager.Form3DmissionTakeOff1Success = true;
+                        }
+                    }
+                    else SwarmManager.takeoffcounter = 0;
+
+                }
+            }
+        }
+    }
+    void Formation3DMissionTakeOff2()
+    {
+        for (int l = 8; l < 12; l++)
+        {
+            if (AgentID == l)
+            {
+                AltHoldSet = SwarmManager.takeOffHight;
+                PosHoldSetX = LandingZone.transform.position.x;
+                PosHoldSetZ = LandingZone.transform.position.z;
+            }
+        }
+
+        if (!SwarmManager.Form3DmissionTakeOff2Success)
+        {
+            for (int i = 8; i < 12; i++)
+            {
+                if (Mathf.Abs(AltHoldSet - SwarmManager.Agent_Y[i]) < 0.3f)
+                {
+                    SwarmManager.AgentTakeOffSucces[i] = true;
+                }
+                for (int j = 8; j < 12; j++)
+                {
+                    if (SwarmManager.AgentTakeOffSucces[j])
+                    {
+                        SwarmManager.takeoffcounter++;
+                        if (SwarmManager.takeoffcounter == 4)
+                        {
+                            SwarmManager.Form3DmissionTakeOff2Success = true;
+                        }
+                    }
+                    else SwarmManager.takeoffcounter = 0;
+
+                }
+            }
+        }
+    }
+
+    void TaskSwitchTakeOff1()
+    {
+        for (int l = 0; l < 6; l++)
+        {
+            if (AgentID == l)
+            {
+                AltHoldSet = SwarmManager.takeOffHight;
+                PosHoldSetX = LandingZone.transform.position.x;
+                PosHoldSetZ = LandingZone.transform.position.z;
+            }
+        }
+
+        if (!SwarmManager.TaskSwitchTakeOff1Succes)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                if (Mathf.Abs(AltHoldSet - SwarmManager.Agent_Y[i]) < 0.3f)
+                {
+                    SwarmManager.AgentTakeOffSucces[i] = true;
+                }
+                for (int j = 0; j < 6; j++)
+                {
+                    if (SwarmManager.AgentTakeOffSucces[j])
+                    {
+                        SwarmManager.takeoffcounter++;
+                        if (SwarmManager.takeoffcounter == 6)
+                        {
+                            SwarmManager.TaskSwitchTakeOff1Succes = true;
+                        }
+                    }
+                    else SwarmManager.takeoffcounter = 0;
+
+                }
+            }
+        }
+
+    }
+
+    void TaskSwitchTakeOff2()
+    {
+        for (int l = 6; l < 8; l++)
+        {
+            if (AgentID == l)
+            {
+                AltHoldSet = SwarmManager.takeOffHight;
+                PosHoldSetX = LandingZone.transform.position.x;
+                PosHoldSetZ = LandingZone.transform.position.z;
+            }
+        }
+
+        if (!SwarmManager.TaskSwitchTakeOff2Succes)
+        {
+            for (int i = 6; i < 8; i++)
+            {
+                if (Mathf.Abs(AltHoldSet - SwarmManager.Agent_Y[i]) < 0.3f)
+                {
+                    SwarmManager.AgentTakeOffSucces[i] = true;
+                }
+                for (int j = 6; j < 8; j++)
+                {
+                    if (SwarmManager.AgentTakeOffSucces[j])
+                    {
+                        SwarmManager.takeoffcounter++;
+                        if (SwarmManager.takeoffcounter == 2)
+                        {
+                            SwarmManager.TaskSwitchTakeOff2Succes = true;
+                        }
+                    }
+                    else SwarmManager.takeoffcounter = 0;
+
+                }
+            }
+        }
+
+    }
 
 
     void Landing()
@@ -269,35 +438,65 @@ public class AgentControl : MonoBehaviour
         float[] Xposition = new float[8];
         float[] Zposition = new float[8];
         float[] Yposition = new float[8];
+        float formationAverageX = 0f;
+        float formationAverageY = 0f;
+        float formationAverageZ = 0f;
 
         float hypotenus = Mathf.Sqrt((Mathf.Pow((SwarmManager.squarePrizmEdge / 2f), 2)) + (Mathf.Pow((SwarmManager.squarePrizmEdge / 2f), 2)));
         Xposition[0] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 45f) * Mathf.Deg2Rad);
         Xposition[1] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 135f) * Mathf.Deg2Rad);
         Xposition[2] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 225f) * Mathf.Deg2Rad);
         Xposition[3] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 315f) * Mathf.Deg2Rad);
-        Xposition[4] = Xposition[0];
-        Xposition[5] = Xposition[1];
-        Xposition[6] = Xposition[2];
-        Xposition[7] = Xposition[3];
 
         Zposition[0] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 45f) * Mathf.Deg2Rad);
         Zposition[1] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 135f) * Mathf.Deg2Rad);
         Zposition[2] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 225f) * Mathf.Deg2Rad);
         Zposition[3] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 315f) * Mathf.Deg2Rad);
-        Zposition[4] = Zposition[0];
-        Zposition[5] = Zposition[1];
-        Zposition[6] = Zposition[2];
-        Zposition[7] = Zposition[3];
 
-        Yposition[0] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.squarePrizmHeight / 2f);
+        Yposition[0] = SwarmManager.formationTargetMiddleHeight + (SwarmManager.squarePrizmHeight / 2f);
         Yposition[1] = Yposition[0];
         Yposition[2] = Yposition[0];
         Yposition[3] = Yposition[0];
-        Yposition[4] = SwarmManager.formationTargetMiddleHeight + (SwarmManager.squarePrizmHeight / 2f);
-        Yposition[5] = Yposition[4];
-        Yposition[6] = Yposition[4];
-        Yposition[7] = Yposition[4];
 
+
+        if (SwarmManager.levelDelay > 0)
+        {
+            SwarmManager.levelDelay -= Time.deltaTime;
+        }
+        if (SwarmManager.levelDelay <= 0)
+        {
+            Xposition[4] = Xposition[0];
+            Xposition[5] = Xposition[1];
+            Xposition[6] = Xposition[2];
+            Xposition[7] = Xposition[3];
+
+            Zposition[4] = Zposition[0];
+            Zposition[5] = Zposition[1];
+            Zposition[6] = Zposition[2];
+            Zposition[7] = Zposition[3];
+
+            Yposition[4] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.squarePrizmHeight / 2f);
+            Yposition[5] = Yposition[4];
+            Yposition[6] = Yposition[4];
+            Yposition[7] = Yposition[4];
+        }
+        else
+        {
+            Xposition[4] = LandingZone.transform.position.x;
+            Xposition[5] = LandingZone.transform.position.x;
+            Xposition[6] = LandingZone.transform.position.x;
+            Xposition[7] = LandingZone.transform.position.x;
+
+            Zposition[4] = LandingZone.transform.position.z;
+            Zposition[5] = LandingZone.transform.position.z;
+            Zposition[6] = LandingZone.transform.position.z;
+            Zposition[7] = LandingZone.transform.position.z;
+
+            Yposition[4] = SwarmManager.takeOffHight;
+            Yposition[5] = SwarmManager.takeOffHight;
+            Yposition[6] = SwarmManager.takeOffHight;
+            Yposition[7] = SwarmManager.takeOffHight;
+        }
 
         for (int i = 0; i < 8; i++)
         {
@@ -318,6 +517,25 @@ public class AgentControl : MonoBehaviour
                 }
             }
         }
+
+
+        for (int c = 0; c < 14; c++)
+        {
+            if (SwarmManager.SquarePrizmInFormation[c])
+            {
+                formationAverageX += SwarmManager.Agent_X[c];
+                formationAverageY += SwarmManager.Agent_Y[c];
+                formationAverageZ += SwarmManager.Agent_Z[c];
+            }
+            if (c == 13)
+            {
+                SwarmManager.FormationMiddleX = formationAverageX / SwarmManager.SquarePrizmAgentRequired;
+                SwarmManager.FormationMiddleY = formationAverageY / SwarmManager.SquarePrizmAgentRequired;
+                SwarmManager.FormationMiddleZ = formationAverageZ / SwarmManager.SquarePrizmAgentRequired;
+            }
+        }
+
+
 
         if (AgentID == 0 && SwarmManager.SquarePrizmInFormation[0])
         {
@@ -500,26 +718,57 @@ public class AgentControl : MonoBehaviour
         float[] Zposition = new float[5];
         float[] Yposition = new float[5];
 
-        float hypotenus = Mathf.Sqrt((Mathf.Pow((SwarmManager.pyramidSquarePrizmEdge / 2f), 2)) + (Mathf.Pow((SwarmManager.pyramidSquarePrizmEdge / 2f), 2)));
-        Xposition[0] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 45f) * Mathf.Deg2Rad);
-        Xposition[1] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 135f) * Mathf.Deg2Rad);
-        Xposition[2] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 225f) * Mathf.Deg2Rad);
-        Xposition[3] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 315f) * Mathf.Deg2Rad);
+        float formationAverageX = 0f;
+        float formationAverageY = 0f;
+        float formationAverageZ = 0f;
+
+
         Xposition[4] = SwarmManager.formationTargetMiddleX;
 
-
-        Zposition[0] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 45f) * Mathf.Deg2Rad);
-        Zposition[1] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 135f) * Mathf.Deg2Rad);
-        Zposition[2] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 225f) * Mathf.Deg2Rad);
-        Zposition[3] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 315f) * Mathf.Deg2Rad);
         Zposition[4] = SwarmManager.formationTargetMiddleZ;
 
-
-        Yposition[0] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.squarePrizmHeight / 2f);
-        Yposition[1] = Yposition[0];
-        Yposition[2] = Yposition[0];
-        Yposition[3] = Yposition[0];
         Yposition[4] = SwarmManager.formationTargetMiddleHeight + (SwarmManager.squarePrizmHeight / 2f);
+
+
+        if (SwarmManager.levelDelay > 0)
+        {
+            SwarmManager.levelDelay -= Time.deltaTime;
+        }
+        if (SwarmManager.levelDelay <= 0)
+        {
+            float hypotenus = Mathf.Sqrt((Mathf.Pow((SwarmManager.pyramidSquarePrizmEdge / 2f), 2)) + (Mathf.Pow((SwarmManager.pyramidSquarePrizmEdge / 2f), 2)));
+            Xposition[0] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 45f) * Mathf.Deg2Rad);
+            Xposition[1] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 135f) * Mathf.Deg2Rad);
+            Xposition[2] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 225f) * Mathf.Deg2Rad);
+            Xposition[3] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 315f) * Mathf.Deg2Rad);
+
+            Zposition[0] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 45f) * Mathf.Deg2Rad);
+            Zposition[1] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 135f) * Mathf.Deg2Rad);
+            Zposition[2] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 225f) * Mathf.Deg2Rad);
+            Zposition[3] = SwarmManager.formationTargetMiddleZ + hypotenus * Mathf.Cos((SwarmManager.FormationHeading + 315f) * Mathf.Deg2Rad);
+
+            Yposition[0] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.squarePrizmHeight / 2f);
+            Yposition[1] = Yposition[0];
+            Yposition[2] = Yposition[0];
+            Yposition[3] = Yposition[0];
+        }
+        else
+        {
+            Xposition[0] = LandingZone.transform.position.x;
+            Xposition[1] = LandingZone.transform.position.x;
+            Xposition[2] = LandingZone.transform.position.x;
+            Xposition[3] = LandingZone.transform.position.x;
+
+            Zposition[0] = LandingZone.transform.position.z;
+            Zposition[1] = LandingZone.transform.position.z;
+            Zposition[2] = LandingZone.transform.position.z;
+            Zposition[3] = LandingZone.transform.position.z;
+
+            Yposition[0] = SwarmManager.takeOffHight;
+            Yposition[1] = SwarmManager.takeOffHight;
+            Yposition[2] = SwarmManager.takeOffHight;
+            Yposition[3] = SwarmManager.takeOffHight;
+        }
 
 
         for (int i = 0; i < 5; i++)
@@ -539,6 +788,22 @@ public class AgentControl : MonoBehaviour
                     SwarmManager.PyramidSquarePrizmPositionFull[SwarmManager.PyramidSquarePrizmAssignedLocationNumber[j]] = false;
                     SwarmManager.AgentFormPyramidSquarePrizmSucces[j] = false;
                 }
+            }
+        }
+
+        for (int c = 0; c < 14; c++)
+        {
+            if (SwarmManager.PyramidSquarePrizmInFormation[c])
+            {
+                formationAverageX += SwarmManager.Agent_X[c];
+                formationAverageY += SwarmManager.Agent_Y[c];
+                formationAverageZ += SwarmManager.Agent_Z[c];
+            }
+            if (c == 13)
+            {
+                SwarmManager.FormationMiddleX = formationAverageX / SwarmManager.PyramidSquarePrizmAgentRequired;
+                SwarmManager.FormationMiddleY = formationAverageY / SwarmManager.PyramidSquarePrizmAgentRequired;
+                SwarmManager.FormationMiddleZ = formationAverageZ / SwarmManager.PyramidSquarePrizmAgentRequired;
             }
         }
 
@@ -716,12 +981,14 @@ public class AgentControl : MonoBehaviour
         }
     }
 
-    
     void TriangleFormation()
     {
         float[] Xposition = new float[3];
         float[] Zposition = new float[3];
         float[] Yposition = new float[3];
+        float formationAverageX = 0f;
+        float formationAverageY = 0f;
+        float formationAverageZ = 0f;
 
         float traiangle2h = (((SwarmManager.triangleEdge / 2f) * 1.73205f) * 2f) / 3f;  // 1.73205f kök 3 deðeri
         Xposition[0] = SwarmManager.formationTargetMiddleX + traiangle2h * Mathf.Sin((SwarmManager.FormationHeading) * Mathf.Deg2Rad);
@@ -755,6 +1022,22 @@ public class AgentControl : MonoBehaviour
                     SwarmManager.TrianglePositionFull[SwarmManager.TriangleAssignedLocationNumber[j]] = false;
                     SwarmManager.AgentFormTriangleSucces[j] = false;
                 }
+            }
+        }
+
+        for (int c = 0; c < 14; c++)
+        {
+            if (SwarmManager.TriangleInFormation[c])
+            {
+                formationAverageX += SwarmManager.Agent_X[c];
+                formationAverageY += SwarmManager.Agent_Y[c];
+                formationAverageZ += SwarmManager.Agent_Z[c];
+            }
+            if (c == 13)
+            {
+                SwarmManager.FormationMiddleX = formationAverageX / SwarmManager.TriangleAgentRequired;
+                SwarmManager.FormationMiddleY = formationAverageY / SwarmManager.TriangleAgentRequired;
+                SwarmManager.FormationMiddleZ = formationAverageZ / SwarmManager.TriangleAgentRequired;
             }
         }
 
@@ -935,34 +1218,66 @@ public class AgentControl : MonoBehaviour
 
     }
     
-    
     void TrianglePrizmFormation()
     {
         float[] Xposition = new float[6];
         float[] Zposition = new float[6];
         float[] Yposition = new float[6];
 
+        float formationAverageX = 0f;
+        float formationAverageY = 0f;
+        float formationAverageZ = 0f;
+
         float traiangle2h = (((SwarmManager.trianglePrizmEdge / 2f) * 1.73205f) * 2f) / 3f;  // 1.73205f kök 3 deðeri
         Xposition[0] = SwarmManager.formationTargetMiddleX + traiangle2h * Mathf.Sin((SwarmManager.FormationHeading) * Mathf.Deg2Rad);
         Xposition[1] = SwarmManager.formationTargetMiddleX + traiangle2h * Mathf.Sin((SwarmManager.FormationHeading + 120f) * Mathf.Deg2Rad);
         Xposition[2] = SwarmManager.formationTargetMiddleX + traiangle2h * Mathf.Sin((SwarmManager.FormationHeading + 240f) * Mathf.Deg2Rad);
-        Xposition[3] = Xposition[0];
-        Xposition[4] = Xposition[1];
-        Xposition[5] = Xposition[2];
 
         Zposition[0] = SwarmManager.formationTargetMiddleZ + traiangle2h * Mathf.Cos((SwarmManager.FormationHeading) * Mathf.Deg2Rad);
         Zposition[1] = SwarmManager.formationTargetMiddleZ + traiangle2h * Mathf.Cos((SwarmManager.FormationHeading + 120f) * Mathf.Deg2Rad);
         Zposition[2] = SwarmManager.formationTargetMiddleZ + traiangle2h * Mathf.Cos((SwarmManager.FormationHeading + 240f) * Mathf.Deg2Rad);
-        Zposition[3] = Zposition[0];
-        Zposition[4] = Zposition[1];
-        Zposition[5] = Zposition[2];
 
-        Yposition[0] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.trianglePrizmHeight / 2f);
+        Yposition[0] = SwarmManager.formationTargetMiddleHeight + (SwarmManager.trianglePrizmHeight / 2f);
         Yposition[1] = Yposition[0];
         Yposition[2] = Yposition[0];
-        Yposition[3] = SwarmManager.formationTargetMiddleHeight + (SwarmManager.trianglePrizmHeight / 2f);
-        Yposition[4] = Yposition[3];
-        Yposition[5] = Yposition[3];
+
+
+
+
+        if (SwarmManager.levelDelay > 0)
+        {
+            SwarmManager.levelDelay -= Time.deltaTime;
+        }
+        if (SwarmManager.levelDelay <= 0)
+        {
+            Xposition[3] = Xposition[0];
+            Xposition[4] = Xposition[1];
+            Xposition[5] = Xposition[2];
+
+            Zposition[3] = Zposition[0];
+            Zposition[4] = Zposition[1];
+            Zposition[5] = Zposition[2];
+
+            Yposition[3] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.trianglePrizmHeight / 2f);
+            Yposition[4] = Yposition[3];
+            Yposition[5] = Yposition[3];
+        }
+        else
+        {
+            Xposition[3] = LandingZone.transform.position.x;
+            Xposition[4] = LandingZone.transform.position.x;
+            Xposition[5] = LandingZone.transform.position.x;
+
+            Zposition[3] = LandingZone.transform.position.z;
+            Zposition[4] = LandingZone.transform.position.z;
+            Zposition[5] = LandingZone.transform.position.z;
+
+            Yposition[3] = SwarmManager.takeOffHight;
+            Yposition[4] = SwarmManager.takeOffHight;
+            Yposition[5] = SwarmManager.takeOffHight;
+        }
+
+
 
         for (int i = 0; i < 6; i++)
         {
@@ -981,6 +1296,23 @@ public class AgentControl : MonoBehaviour
                     SwarmManager.TrianglePrizmPositionFull[SwarmManager.TrianglePrizmAssignedLocationNumber[j]] = false;
                     SwarmManager.AgentFormTrianglePrizmSucces[j] = false;
                 }
+            }
+        }
+
+
+        for (int c = 0; c < 14; c++)
+        {
+            if (SwarmManager.TrianglePrizmInFormation[c])
+            {
+                formationAverageX += SwarmManager.Agent_X[c];
+                formationAverageY += SwarmManager.Agent_Y[c];
+                formationAverageZ += SwarmManager.Agent_Z[c];
+            }
+            if (c == 13)
+            {
+                SwarmManager.FormationMiddleX = formationAverageX / SwarmManager.TrianglePrizmAgentRequired;
+                SwarmManager.FormationMiddleY = formationAverageY / SwarmManager.TrianglePrizmAgentRequired;
+                SwarmManager.FormationMiddleZ = formationAverageZ / SwarmManager.TrianglePrizmAgentRequired;
             }
         }
 
@@ -1167,6 +1499,10 @@ public class AgentControl : MonoBehaviour
         float[] Zposition = new float[4];
         float[] Yposition = new float[4];
 
+        float formationAverageX = 0f;
+        float formationAverageY = 0f;
+        float formationAverageZ = 0f;
+
         float hypotenus = Mathf.Sqrt((Mathf.Pow((SwarmManager.squareEdge / 2f), 2)) + (Mathf.Pow((SwarmManager.squareEdge / 2f), 2)));
         Xposition[0] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 45f) * Mathf.Deg2Rad);
         Xposition[1] = SwarmManager.formationTargetMiddleX + hypotenus * Mathf.Sin((SwarmManager.FormationHeading + 135f) * Mathf.Deg2Rad);
@@ -1201,6 +1537,22 @@ public class AgentControl : MonoBehaviour
                     SwarmManager.SquarePositionFull[SwarmManager.SquareAssignedLocationNumber[j]] = false;
                     SwarmManager.AgentFormSquareSucces[j] = false;
                 }
+            }
+        }
+
+        for (int c = 0; c < 14; c++)
+        {
+            if (SwarmManager.SquareInFormation[c])
+            {
+                formationAverageX += SwarmManager.Agent_X[c];
+                formationAverageY += SwarmManager.Agent_Y[c];
+                formationAverageZ += SwarmManager.Agent_Z[c];
+            }
+            if (c == 13)
+            {
+                SwarmManager.FormationMiddleX = formationAverageX / SwarmManager.SquareAgentRequired;
+                SwarmManager.FormationMiddleY = formationAverageY / SwarmManager.SquareAgentRequired;
+                SwarmManager.FormationMiddleZ = formationAverageZ / SwarmManager.SquareAgentRequired;
             }
         }
 
@@ -1384,18 +1736,17 @@ public class AgentControl : MonoBehaviour
         float[] Zposition = new float[12];
         float[] Yposition = new float[12];
 
+        float formationAverageX = 0f;
+        float formationAverageY = 0f;
+        float formationAverageZ = 0f;
+
         Xposition[0] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 30f) * Mathf.Deg2Rad);
         Xposition[1] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 90f) * Mathf.Deg2Rad);
         Xposition[2] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 150f) * Mathf.Deg2Rad);
         Xposition[3] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 210f) * Mathf.Deg2Rad);
         Xposition[4] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 270f) * Mathf.Deg2Rad);
         Xposition[5] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 330f) * Mathf.Deg2Rad);
-        Xposition[6] = Xposition[0];
-        Xposition[7] = Xposition[1];
-        Xposition[8] = Xposition[2];
-        Xposition[9] = Xposition[3];
-        Xposition[10] = Xposition[4];
-        Xposition[11] = Xposition[5];
+
 
         Zposition[0] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 30f) * Mathf.Deg2Rad);
         Zposition[1] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 90f) * Mathf.Deg2Rad);
@@ -1403,25 +1754,69 @@ public class AgentControl : MonoBehaviour
         Zposition[3] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 210f) * Mathf.Deg2Rad);
         Zposition[4] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 270f) * Mathf.Deg2Rad);
         Zposition[5] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 330f) * Mathf.Deg2Rad);
-        Zposition[6] = Zposition[0];
-        Zposition[7] = Zposition[1];
-        Zposition[8] = Zposition[2];
-        Zposition[9] = Zposition[3];
-        Zposition[10] = Zposition[4];
-        Zposition[11] = Zposition[5];
+       
              
-        Yposition[0] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.hexagonPrizmHeight / 2f);
+        Yposition[0] = SwarmManager.formationTargetMiddleHeight + (SwarmManager.hexagonPrizmHeight / 2f);
         Yposition[1] = Yposition[0];
         Yposition[2] = Yposition[0];
         Yposition[3] = Yposition[0];
         Yposition[4] = Yposition[0];
         Yposition[5] = Yposition[0];
-        Yposition[6] = SwarmManager.formationTargetMiddleHeight + (SwarmManager.hexagonPrizmHeight / 2f);
-        Yposition[7] = Yposition[6];
-        Yposition[8] = Yposition[6];
-        Yposition[9] = Yposition[6];
-        Yposition[10] = Yposition[6];
-        Yposition[11] = Yposition[6];
+        
+
+
+        if (SwarmManager.levelDelay > 0)
+        {
+            SwarmManager.levelDelay -= Time.deltaTime;
+        }
+        if (SwarmManager.levelDelay <= 0)
+        {
+            Xposition[6] = Xposition[0];
+            Xposition[7] = Xposition[1];
+            Xposition[8] = Xposition[2];
+            Xposition[9] = Xposition[3];
+            Xposition[10] = Xposition[4];
+            Xposition[11] = Xposition[5];
+
+            Zposition[6] = Zposition[0];
+            Zposition[7] = Zposition[1];
+            Zposition[8] = Zposition[2];
+            Zposition[9] = Zposition[3];
+            Zposition[10] = Zposition[4];
+            Zposition[11] = Zposition[5];
+
+            Yposition[6] = SwarmManager.formationTargetMiddleHeight - (SwarmManager.hexagonPrizmHeight / 2f);
+            Yposition[7] = Yposition[6];
+            Yposition[8] = Yposition[6];
+            Yposition[9] = Yposition[6];
+            Yposition[10] = Yposition[6];
+            Yposition[11] = Yposition[6];
+        }
+        else
+        {
+            Xposition[6] = LandingZone.transform.position.x;
+            Xposition[7] = LandingZone.transform.position.x;
+            Xposition[8] = LandingZone.transform.position.x;
+            Xposition[9] = LandingZone.transform.position.x;
+            Xposition[10] = LandingZone.transform.position.x;
+            Xposition[11] = LandingZone.transform.position.x;
+
+            Zposition[6] = LandingZone.transform.position.z;
+            Zposition[7] = LandingZone.transform.position.z;
+            Zposition[8] = LandingZone.transform.position.z;
+            Zposition[9] = LandingZone.transform.position.z;
+            Zposition[10] = LandingZone.transform.position.z;
+            Zposition[11] = LandingZone.transform.position.z;
+
+            Yposition[6] = SwarmManager.takeOffHight;
+            Yposition[7] = SwarmManager.takeOffHight;
+            Yposition[8] = SwarmManager.takeOffHight;
+            Yposition[9] = SwarmManager.takeOffHight;
+            Yposition[10] = SwarmManager.takeOffHight;
+            Yposition[11] = SwarmManager.takeOffHight;
+        }
+
+
 
         for (int i = 0; i < 12; i++)
         {
@@ -1440,6 +1835,22 @@ public class AgentControl : MonoBehaviour
                     SwarmManager.HexagonPrizmPositionFull[SwarmManager.HexagonPrizmAssignedLocationNumber[j]] = false;
                     SwarmManager.AgentFormHexagonPrizmSucces[j] = false;
                 }
+            }
+        }
+
+        for (int c = 0; c < 14; c++)
+        {
+            if (SwarmManager.HexagonPrizmInFormation[c])
+            {
+                formationAverageX += SwarmManager.Agent_X[c];
+                formationAverageY += SwarmManager.Agent_Y[c];
+                formationAverageZ += SwarmManager.Agent_Z[c];
+            }
+            if (c == 13)
+            {
+                SwarmManager.FormationMiddleX = formationAverageX / SwarmManager.HexagonPrizmAgentRequired;
+                SwarmManager.FormationMiddleY = formationAverageY / SwarmManager.HexagonPrizmAgentRequired;
+                SwarmManager.FormationMiddleZ = formationAverageZ / SwarmManager.HexagonPrizmAgentRequired;
             }
         }
 
@@ -1616,7 +2027,249 @@ public class AgentControl : MonoBehaviour
         }
     }
 
+    void HexagonFormation()
+    {
+        float[] Xposition = new float[6];
+        float[] Zposition = new float[6];
+        float[] Yposition = new float[6];
 
+        float formationAverageX = 0f;
+        float formationAverageY = 0f;
+        float formationAverageZ = 0f;
+
+        Xposition[0] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 30f) * Mathf.Deg2Rad);
+        Xposition[1] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 90f) * Mathf.Deg2Rad);
+        Xposition[2] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 150f) * Mathf.Deg2Rad);
+        Xposition[3] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 210f) * Mathf.Deg2Rad);
+        Xposition[4] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 270f) * Mathf.Deg2Rad);
+        Xposition[5] = SwarmManager.formationTargetMiddleX + SwarmManager.hexagonPrizmEdge * Mathf.Sin((SwarmManager.FormationHeading + 330f) * Mathf.Deg2Rad);
+
+        Zposition[0] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 30f) * Mathf.Deg2Rad);
+        Zposition[1] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 90f) * Mathf.Deg2Rad);
+        Zposition[2] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 150f) * Mathf.Deg2Rad);
+        Zposition[3] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 210f) * Mathf.Deg2Rad);
+        Zposition[4] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 270f) * Mathf.Deg2Rad);
+        Zposition[5] = SwarmManager.formationTargetMiddleZ + SwarmManager.hexagonPrizmEdge * Mathf.Cos((SwarmManager.FormationHeading + 330f) * Mathf.Deg2Rad);
+
+        Yposition[0] = SwarmManager.formationTargetMiddleHeight;
+        Yposition[1] = Yposition[0];
+        Yposition[2] = Yposition[0];
+        Yposition[3] = Yposition[0];
+        Yposition[4] = Yposition[0];
+        Yposition[5] = Yposition[0];
+
+
+        for (int i = 0; i < 6; i++)
+        {
+            for (int j = 0; j < 14; j++)
+            {
+                if (SwarmManager.ActiveAgents[j] && !SwarmManager.HexagonInFormation[j] && !SwarmManager.HexagonPositionFull[i])
+                {
+                    SwarmManager.HexagonAssignedLocationNumber[j] = i;
+                    SwarmManager.HexagonInFormation[j] = true;
+                    SwarmManager.HexagonPositionFull[i] = true;
+                    break;
+                }
+                else if (!SwarmManager.ActiveAgents[j] && SwarmManager.HexagonInFormation[j])
+                {
+                    SwarmManager.HexagonInFormation[j] = false;
+                    SwarmManager.HexagonPositionFull[SwarmManager.HexagonAssignedLocationNumber[j]] = false;
+                    SwarmManager.AgentFormHexagonSucces[j] = false;
+                }
+            }
+        }
+
+        for (int c = 0; c < 14; c++)
+        {
+            if (SwarmManager.HexagonInFormation[c])
+            {
+                formationAverageX += SwarmManager.Agent_X[c];
+                formationAverageY += SwarmManager.Agent_Y[c];
+                formationAverageZ += SwarmManager.Agent_Z[c];
+            }
+            if (c == 13)
+            {
+                SwarmManager.FormationMiddleX = formationAverageX / SwarmManager.HexagonAgentRequired;
+                SwarmManager.FormationMiddleY = formationAverageY / SwarmManager.HexagonAgentRequired;
+                SwarmManager.FormationMiddleZ = formationAverageZ / SwarmManager.HexagonAgentRequired;
+            }
+        }
+
+        if (AgentID == 0 && SwarmManager.HexagonInFormation[0])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[0]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[0]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[0]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[0], SwarmManager.Agent_Y[0], SwarmManager.Agent_Z[0]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[0] = true;
+            }
+        }
+        if (AgentID == 1 && SwarmManager.HexagonInFormation[1])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[1]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[1]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[1]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[1], SwarmManager.Agent_Y[1], SwarmManager.Agent_Z[1]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[1] = true;
+            }
+        }
+        if (AgentID == 2 && SwarmManager.HexagonInFormation[2])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[2]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[2]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[2]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[2], SwarmManager.Agent_Y[2], SwarmManager.Agent_Z[2]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[2] = true;
+            }
+        }
+        if (AgentID == 3 && SwarmManager.HexagonInFormation[3])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[3]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[3]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[3]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[3], SwarmManager.Agent_Y[3], SwarmManager.Agent_Z[3]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[3] = true;
+            }
+        }
+        if (AgentID == 4 && SwarmManager.HexagonInFormation[4])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[4]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[4]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[4]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[4], SwarmManager.Agent_Y[4], SwarmManager.Agent_Z[4]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[4] = true;
+            }
+        }
+        if (AgentID == 5 && SwarmManager.HexagonInFormation[5])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[5]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[5]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[5]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[5], SwarmManager.Agent_Y[5], SwarmManager.Agent_Z[5]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[5] = true;
+            }
+        }
+        if (AgentID == 6 && SwarmManager.HexagonInFormation[6])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[6]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[6]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[6]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[6], SwarmManager.Agent_Y[6], SwarmManager.Agent_Z[6]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[6] = true;
+            }
+        }
+        if (AgentID == 7 && SwarmManager.HexagonInFormation[7])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[7]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[7]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[7]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[7], SwarmManager.Agent_Y[7], SwarmManager.Agent_Z[7]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[7] = true;
+            }
+        }
+        if (AgentID == 8 && SwarmManager.HexagonInFormation[8])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[8]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[8]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[8]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[8], SwarmManager.Agent_Y[8], SwarmManager.Agent_Z[8]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[8] = true;
+            }
+        }
+        if (AgentID == 9 && SwarmManager.HexagonInFormation[9])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[9]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[9]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[9]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[9], SwarmManager.Agent_Y[9], SwarmManager.Agent_Z[9]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[9] = true;
+            }
+        }
+        if (AgentID == 10 && SwarmManager.HexagonInFormation[10])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[10]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[10]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[10]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[10], SwarmManager.Agent_Y[10], SwarmManager.Agent_Z[10]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[10] = true;
+            }
+        }
+        if (AgentID == 11 && SwarmManager.HexagonInFormation[11])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[11]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[11]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[11]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[11], SwarmManager.Agent_Y[11], SwarmManager.Agent_Z[11]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[11] = true;
+            }
+        }
+        if (AgentID == 12 && SwarmManager.HexagonInFormation[12])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[12]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[12]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[12]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[12], SwarmManager.Agent_Y[12], SwarmManager.Agent_Z[12]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[12] = true;
+            }
+        }
+        if (AgentID == 13 && SwarmManager.HexagonInFormation[13])
+        {
+            PosHoldSetX = Xposition[SwarmManager.HexagonAssignedLocationNumber[13]];
+            PosHoldSetZ = Zposition[SwarmManager.HexagonAssignedLocationNumber[13]];
+            AltHoldSet = Yposition[SwarmManager.HexagonAssignedLocationNumber[13]];
+
+            if (Vector3.Distance(new Vector3(SwarmManager.Agent_X[13], SwarmManager.Agent_Y[13], SwarmManager.Agent_Z[13]), new Vector3(PosHoldSetX, AltHoldSet, PosHoldSetZ)) < 0.5f)
+            {
+                SwarmManager.AgentFormHexagonSucces[13] = true;
+            }
+        }
+
+        for (int k = 0; k < 14; k++)
+        {
+            if (SwarmManager.AgentFormHexagonSucces[k])
+            {
+                SwarmManager.hexagonCounter++;
+            }
+        }
+        if (SwarmManager.hexagonCounter == SwarmManager.HexagonAgentRequired)
+        {
+            SwarmManager.FormHexagonSucces = true;
+            SwarmManager.hexagonCounter = 0;
+        }
+        else
+        {
+            SwarmManager.FormHexagonSucces = false;
+            SwarmManager.hexagonCounter = 0;
+        }
+
+
+    }
 
     void PID()
     {

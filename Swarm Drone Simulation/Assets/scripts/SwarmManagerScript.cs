@@ -34,16 +34,12 @@ public class SwarmManagerScript : MonoBehaviour
     public float[] AgentTargetHeading = new float[14];
     [HideInInspector]
     public float[] AgentBatteryStatus = new float[14];
-
-
-    //public bool FormArrowHead = false;
-    //public bool FormTriangle = false;
-    //public bool FormTrianglePrizm = false;
-    
     
 
 
     public bool TakeOff = false;
+    public bool takeOffSucces = false;
+
     public bool Mission = false;
     float[,] CollisionDistance = new float[13, 14];
     float[,] PrevCollisionDistance = new float[13, 14];
@@ -69,10 +65,10 @@ public class SwarmManagerScript : MonoBehaviour
 
     [HideInInspector]
     public bool[] AgentTakeOffSucces = new bool[14];
-    public bool takeOffSucces = false;
+    
     [HideInInspector]
     public bool[] AgentLandedSucces = new bool[14];
-    public bool LandedSucces = false;
+    //public bool LandedSucces = false;
 
 
 
@@ -110,6 +106,7 @@ public class SwarmManagerScript : MonoBehaviour
     [HideInInspector]
     public bool[] SquarePrizmPositionFull = new bool[8];
 
+
     /// PYRAMID SQUARE PRIZM FORMATION
     public float pyramidSquarePrizmEdge = 3f, pyramidSquarePrizmHeight = 3f;
     [HideInInspector]
@@ -124,6 +121,7 @@ public class SwarmManagerScript : MonoBehaviour
     public int[] PyramidSquarePrizmAssignedLocationNumber = new int[14];
     [HideInInspector]
     public bool[] PyramidSquarePrizmPositionFull = new bool[5];
+    public float PyramidSquarePrizmFormationMiddle;
 
     /// TRIANGLE FORMATION
     public float triangleEdge = 3f;
@@ -179,12 +177,27 @@ public class SwarmManagerScript : MonoBehaviour
     public bool FormHexagonPrizm = false;
     [HideInInspector]
     public int HexagonPrizmAgentRequired = 12;
-    //[HideInInspector]
+    [HideInInspector]
     public bool[] HexagonPrizmInFormation = new bool[14];
-    //[HideInInspector]
+    [HideInInspector]
     public int[] HexagonPrizmAssignedLocationNumber = new int[14];
-    //[HideInInspector]
+    [HideInInspector]
     public bool[] HexagonPrizmPositionFull = new bool[12];
+
+    /// HEXAGON FORMATION
+    public float hexagonEdge = 3f;
+    [HideInInspector]
+    public bool[] AgentFormHexagonSucces = new bool[14];
+    public bool FormHexagonSucces = false;
+    public bool FormHexagon = false;
+    [HideInInspector]
+    public int HexagonAgentRequired = 6;
+    [HideInInspector]
+    public bool[] HexagonInFormation = new bool[14];
+    [HideInInspector]
+    public int[] HexagonAssignedLocationNumber = new int[14];
+    [HideInInspector]
+    public bool[] HexagonPositionFull = new bool[6];
 
     [HideInInspector]
     public int takeoffcounter;
@@ -200,6 +213,32 @@ public class SwarmManagerScript : MonoBehaviour
     public int squareCounter;
     [HideInInspector]
     public int hexagonPrizmCounter;
+    [HideInInspector]
+    public int hexagonCounter;
+    public float levelDelay = 5;
+
+    public float FormationMiddleX;
+    public float FormationMiddleZ;
+    public float FormationMiddleY;
+
+    public float Form3DmissionDelay1 = 5f;
+    public float Form3DmissionDelay2 = 5f;
+    public float Form3DmissionDelay3 = 5f;
+    float Form3DmissionLandingDelay = 2f;
+    int Form3DmissionLandingCounter = 11;
+    bool Form3DmissionLandingSucces = false;
+    public bool Form3DmissionTakeOff1 = false;
+    public bool Form3DmissionTakeOff2 = false;
+    public bool Form3DmissionTakeOff1Success = false;
+    public bool Form3DmissionTakeOff2Success = false;
+
+    public bool TaskSwitchTakeOff1 = false;
+    public bool TaskSwitchTakeOff1Succes = false;
+    public bool TaskSwitchTakeOff2 = false;
+    public bool TaskSwitchTakeOff2Succes = false;
+    public float TaskSwaitchDelay1 = 5f;
+    public float TaskSwaitchDelay2 = 5f;
+    public float TaskSwaitchDelay3 = 5f;
 
     private void Awake()
     {
@@ -221,9 +260,8 @@ public class SwarmManagerScript : MonoBehaviour
     {
 
         getAgentData();
-        Formation3DMission();
+        TaskSwitchMission();
         AvoidCollision();
-        //SwarmNavigate();
 
         if (FormationHeadingSet > FormationHeading)
         {
@@ -233,97 +271,150 @@ public class SwarmManagerScript : MonoBehaviour
         {
             FormationHeading -= formHeadDegSn * sampleTime;
         }
+        
+    }
 
-
-        /*
-
-        if (newCheckpoint)
+    void TaskSwitchMission()
+    {
+        if (!TaskSwitchTakeOff1Succes)
         {
-            checkpointX = Random.Range(150, 350);
-            checkpointZ = Random.Range(150, 350);
-            checkpointY = Random.Range(5, 40);
-            checkpoint.transform.position = new Vector3(checkpointX, checkpointY, checkpointZ);
-            newCheckpoint = false;
+            TaskSwitchTakeOff1 = true;
         }
         else
         {
-            for (int k = 0; k < 10; k++)
+            TaskSwitchTakeOff1 = false;
+
+            if (!FormHexagonSucces && !FormHexagon)
             {
-                AgentProximity[k] = Mathf.Sqrt(Mathf.Pow((checkpointX - Agent_X[k]), 2) + Mathf.Pow((checkpointY - Agent_Y[k]), 2) + Mathf.Pow((checkpointZ - Agent_Z[k]), 2));
-                AgentTargetHeading[k] = (Mathf.Atan2((checkpointX - Agent_X[k]), (Agent_Z[k] - checkpointZ)) * Mathf.Rad2Deg) * -1f;
-                
-                if (AgentProximity[k] < 2f)
-                {
-                    newCheckpoint = true;
-                }
+                FormHexagon = true;
             }
+            else if (FormHexagonSucces && TaskSwaitchDelay1 > 0f)
+            {
+                TaskSwaitchDelay1 -= Time.deltaTime;
+            }
+            else if (FormHexagonSucces && TaskSwaitchDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 0)
+            {
+                SwarmNavigate();
+            }
+            else if (FormHexagonSucces && TaskSwaitchDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 1 && TaskSwaitchDelay2 > 0)
+            {
+                TaskSwaitchDelay2 -= Time.deltaTime;
+            }
+            else if (FormHexagonSucces && TaskSwaitchDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 1 && TaskSwaitchDelay2 <= 0)
+            {
+                SwarmNavigate();
+            }
+            else if (FormHexagonSucces && TaskSwaitchDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 2 && TaskSwaitchDelay3 > 0)
+            {
+                TaskSwaitchDelay3 -= Time.deltaTime;
+            }
+            else if (FormHexagonSucces && TaskSwaitchDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 2 && TaskSwaitchDelay3 <= 0)
+            {
+                SwarmNavigate();
+            }
+            else if (NavMissionSucces && FormHexagon && !FormHexagonSucces && !TaskSwitchTakeOff2Succes)
+            {
+                FormHexagon = false;
+                TaskSwitchTakeOff2 = true;
+            }
+            else if (TaskSwitchTakeOff2Succes)
+            {
+                TaskSwitchTakeOff2 = false;
+                FormHexagon = true;
+            }
+
         }
-        */
-        
     }
 
     void Formation3DMission()
     {
-        if (!takeOffSucces)
+        if (!Form3DmissionTakeOff1Success)
         {
-            TakeOff = true;
+            Form3DmissionTakeOff1 = true;
         }
         else
         {
-            TakeOff = false;
-            
-            if (!FormHexagonPrizmSucces && !FormHexagonPrizm)
-            {
-                FormHexagonPrizm = true;
+            Form3DmissionTakeOff1 = false;
 
-                //formationTargetMiddleX = checkpointX;
-                //formationTargetMiddleZ = checkpointZ;
-                //formationTargetMiddleHeight = checkpointY;
-                //Debug.Log("1");
-            }
-            else if (FormHexagonPrizmSucces && formationDelay > 0f)
+            if (!FormSquarePrizmSucces && !FormSquarePrizm)
             {
-                formationDelay -= Time.deltaTime;
-                //FormPyramidSquarePrizm = false;
-                //Debug.Log("2");
+                FormSquarePrizm = true;
             }
-            else if (FormHexagonPrizmSucces && formationDelay <= 0 && !NavMissionSucces)
+            else if (FormSquarePrizmSucces && Form3DmissionDelay1 > 0f)
+            {
+                Form3DmissionDelay1 -= Time.deltaTime;
+            }
+            else if (FormSquarePrizmSucces && Form3DmissionDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 0)
             {
                 SwarmNavigate();
-                //Debug.Log("3");
             }
-
-            /*
-            else if (FormSquarePrizmSucces && formationDelay > 0f)
+            else if (ReachedCheckPoints == 1 && Form3DmissionDelay2 > 0)
             {
-                formationDelay -= Time.deltaTime;
+                Form3DmissionDelay2 -= Time.deltaTime;
+            }
+            else if (Form3DmissionDelay2 <= 0 && FormationHeading < 89)
+            {
+                FormationHeadingSet = 90f;
+            }
+            else if (FormSquarePrizmSucces && Form3DmissionDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 1 && Form3DmissionDelay2 <= 0 && FormationHeading >= 89)
+            {
+                SwarmNavigate();
+            }
+            else if (FormSquarePrizmSucces && Form3DmissionDelay1 <= 0 && !NavMissionSucces && ReachedCheckPoints == 2 && Form3DmissionDelay2 <= 0 && FormationHeading >= 89 
+                && !Form3DmissionTakeOff2Success)
+            {
+                Form3DmissionTakeOff2 = true;
+            }
+            else if (Form3DmissionTakeOff2Success && Form3DmissionTakeOff2)
+            {
+                Form3DmissionTakeOff2 = false;
                 FormSquarePrizm = false;
-                Debug.Log("4");
-            }*/
-            
-            
+                FormHexagonPrizm = true;
+            }
+            else if (FormHexagonPrizmSucces && Form3DmissionDelay3 > 0)
+            {
+                Form3DmissionDelay3 -= Time.deltaTime;
+            }
+            else if (Form3DmissionDelay3 <= 0 && !NavMissionSucces)
+            {
+                SwarmNavigate();
+            }
+            else if (NavMissionSucces && !Form3DmissionLandingSucces)
+            {
+                FormHexagonPrizm = false;
+                Form3DmissionLandingDelay -= Time.deltaTime;
+                if (Form3DmissionLandingDelay <= 0)
+                {
+                    ActiveAgents[Form3DmissionLandingCounter] = false;
+                    Form3DmissionLandingDelay = 2f;
+                    Form3DmissionLandingCounter--;
+                    if (Form3DmissionLandingCounter == -1)
+                    {
+                        Form3DmissionLandingSucces = true;
+                    }
+                }
+            }
         }
     }
+
+
+
+
 
     void SwarmNavigate()
     {
         diffX = Mathf.Abs(Mathf.Abs(Waypoints[ReachedCheckPoints].transform.position.x) - Mathf.Abs(formationTargetMiddleX));
         diffZ = Mathf.Abs(Mathf.Abs(Waypoints[ReachedCheckPoints].transform.position.z) - Mathf.Abs(formationTargetMiddleZ));
 
-        for (int k = 0; k < 14; k++)
-        {
-            AgentProximity[k] = Mathf.Sqrt(Mathf.Pow((Waypoints[ReachedCheckPoints].transform.position.x - Agent_X[k]), 2) 
-                + Mathf.Pow((Waypoints[ReachedCheckPoints].transform.position.y - Agent_Y[k]), 2) 
-                + Mathf.Pow((Waypoints[ReachedCheckPoints].transform.position.z - Agent_Z[k]), 2));
 
-            if (AgentProximity[k] < 2f)
+        if (Vector3.Distance(new Vector3(Waypoints[ReachedCheckPoints].transform.position.x, Waypoints[ReachedCheckPoints].transform.position.y, Waypoints[ReachedCheckPoints].transform.position.z)
+            , new Vector3(FormationMiddleX, FormationMiddleY, FormationMiddleZ)) < 1f)
+        {
+            ReachedCheckPoints++;
+            if (ReachedCheckPoints == 3)
             {
-                ReachedCheckPoints++;
-                if (ReachedCheckPoints == 3)
-                {
-                    NavMissionSucces = true;
-                    ReachedCheckPoints--;
-                }
+                NavMissionSucces = true;
+                ReachedCheckPoints--;
             }
         }
 
