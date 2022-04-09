@@ -1,0 +1,109 @@
+{
+    "name": "New Controls",
+    "maps": [
+        {
+            "name": "uavControl",
+            "id": "dadc7866-d197-4d06-bcab-1f55a38ae468",
+            "actions": [
+                {
+                    "name": "PitchRollControl",
+                    "type": "Value",
+                    "id": "357a2a95-9c1c-4871-978d-122a2f9a6a8f",
+                    "expectedControlType": "Stick",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "ThrottleYawControl",
+                    "type": "Value",
+                    "id": "9260f3b0-cf85-4190-8727-07f8cc0aaf56",
+                    "expectedControlType": "Stick",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "ArmDisarm",
+                    "type": "Button",
+                    "id": "f2e427f0-84f6-419d-8468-0cabd7b627fc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold"
+                },
+                {
+                    "name": "CalibrateGyro",
+                    "type": "Button",
+                    "id": "bab5896d-b531-4e40-824a-36d15d1898e7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "MultiTap(tapCount=3)"
+                },
+                {
+                    "name": "CalibrateAcc",
+                    "type": "Button",
+                    "id": "8389c023-a864-46fc-82f5-9c3736da6942",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "MultiTap(tapCount=3)"
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e6945666-a582-4fe1-9e62-f700bb3b52ee",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PitchRollControl",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a505c963-5c57-40b9-9ab5-d7d0b6a730bc",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThrottleYawControl",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6f2c78d1-919d-4fd2-8f6a-8059b628f57a",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ArmDisarm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8aa40e1b-fd08-43f4-a87c-5958d085f3e7",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CalibrateGyro",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f987e663-9ede-4703-9d21-db48a73880a4",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CalibrateAcc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

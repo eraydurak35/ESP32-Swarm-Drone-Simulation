@@ -11,7 +11,7 @@ public class AgentBattery : MonoBehaviour
     public float intResistance = 0.043f;
 
     public float usedCapacity = 0f;
-    public float RemainBattPercent = 0f;
+    public float RemainBattPercent = 100f;
     public float updateRate = 200;
     private float vSag = 0f;
 
